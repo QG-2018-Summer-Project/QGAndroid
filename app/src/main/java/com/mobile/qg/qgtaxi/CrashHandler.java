@@ -50,7 +50,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
      */
     public void init(Context context) {
 
-        mCrashPath = Objects.requireNonNull(context.getExternalFilesDir(null)).getAbsolutePath();
+        mCrashPath = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
         Log.e("正在测试Crash", "init: " + mCrashPath);
 
         try {
@@ -125,13 +125,18 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
 
             mCrashPath = mCrashPath + "/crash/";
             File dir = new File(mCrashPath);
-            if (dir.exists() || (!dir.exists() && dir.mkdirs())) {
-                Log.e("TEST", "saveCrashInfo2File: " + dir.getAbsolutePath());
-                FileOutputStream fos = new FileOutputStream(mCrashPath + fileName, true);
-                fos.write((sb.toString()).getBytes());
-                fos.flush();
-                fos.close();
+            if (!dir.exists()) {
+                dir.mkdirs();
             }
+            Log.e("TEST", "saveCrashInfo2File: " + dir.getAbsolutePath());
+            File file = new File(mCrashPath + fileName);
+            file.createNewFile();
+            Log.e("TSTS", "saveCrashInfo2File: " + file.getAbsolutePath() + file.exists());
+            FileOutputStream fos = new FileOutputStream(file, true);
+            fos.write((sb.toString()).getBytes());
+            fos.flush();
+            fos.close();
+//            }
 
         } catch (Exception ignore) {
 
