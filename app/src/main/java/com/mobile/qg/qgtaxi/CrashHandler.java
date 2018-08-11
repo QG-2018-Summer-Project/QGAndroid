@@ -128,15 +128,12 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
             if (!dir.exists()) {
                 dir.mkdirs();
             }
-            Log.e("TEST", "saveCrashInfo2File: " + dir.getAbsolutePath());
             File file = new File(mCrashPath + fileName);
             file.createNewFile();
-            Log.e("TSTS", "saveCrashInfo2File: " + file.getAbsolutePath() + file.exists());
             FileOutputStream fos = new FileOutputStream(file, true);
             fos.write((sb.toString()).getBytes());
             fos.flush();
             fos.close();
-//            }
 
         } catch (Exception ignore) {
 
