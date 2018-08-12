@@ -1,14 +1,17 @@
-package com.mobile.qg.qgtaxi.entity
+package com.mobile.qg.qgtaxi.heatmap
+
+import com.google.gson.annotations.SerializedName
 
 /**
  * Created by 11234 on 2018/8/12.
- * 热力图中 点的标准返回类
+ * 热力图中点的标准返回类
  */
-data class LatLngResponse(
+data class HeatMapLatLng(
 
         /**
          * 经度
          */
+        @SerializedName(value = "lon", alternate = ["lng"])
         var lon: Double,
 
         /**

@@ -1,4 +1,4 @@
-package com.mobile.qg.qgtaxi.entity
+package com.mobile.qg.qgtaxi.heatmap
 
 /**
  * Created by 11234 on 2018/8/12.
@@ -10,6 +10,6 @@ data class HeatMapResponse(
         /**
          * 热力图中点的集合
          */
-        var pointSet: List<LatLngResponse>
+        var pointSet: List<HeatMapLatLng>
 
 )
