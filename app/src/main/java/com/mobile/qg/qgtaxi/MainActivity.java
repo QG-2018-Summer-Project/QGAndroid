@@ -12,22 +12,38 @@ import android.widget.TextView;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.model.BitmapDescriptor;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MarkerOptions;
+import com.amap.api.maps.model.TileOverlayOptions;
 import com.amap.api.maps.model.VisibleRegion;
+import com.google.gson.Gson;
 import com.mobile.qg.qgtaxi.entity.CurrentLatLng;
 import com.mobile.qg.qgtaxi.entity.LatLngFactory;
 import com.mobile.qg.qgtaxi.heatmap.HeatMapApi;
 import com.mobile.qg.qgtaxi.heatmap.HeatMapCallback;
 import com.mobile.qg.qgtaxi.heatmap.HeatMapLatLng;
 import com.mobile.qg.qgtaxi.heatmap.HeatMapOverlay;
+import com.mobile.qg.qgtaxi.heatmap.HeatMapResponse;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+import io.reactivex.FlowableEmitter;
+import io.reactivex.FlowableOnSubscribe;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.Response;
 
 public final class MainActivity extends AppCompatActivity implements
         AMap.OnMapClickListener,
@@ -36,7 +52,13 @@ public final class MainActivity extends AppCompatActivity implements
     private static final String TAG = "MainActivity";
 
     //广州中心坐标
-    public static final LatLng GUANGZHOU = new LatLng(23.117055, 113.275995);
+    private static final LatLng GUANGZHOU = new LatLng(23.117055, 113.275995);
+
+    //绿色标记
+    private static final BitmapDescriptor GREEN_MARKER = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
+
+    //轮询间隔
+    private static long sPollingInterval = 5000;
 
     @BindView(R.id.map)
     protected MapView mMapView;
@@ -61,9 +83,12 @@ public final class MainActivity extends AppCompatActivity implements
         mAMap.setOnCameraChangeListener(this);
 
         changeCamera(GUANGZHOU, false);
-
+        isHeatMapping = true;
 
         requestPermission();
+
+        pollHeatMap();
+
     }
 
     /**
@@ -73,10 +98,10 @@ public final class MainActivity extends AppCompatActivity implements
      * @param shouldMarked 是否标记
      */
     private void changeCamera(LatLng latLng, boolean shouldMarked) {
-        mAMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 11, 0, 0)));
+        mAMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 11, 0, 0)));
         if (shouldMarked) {
             mAMap.clear();
-            mAMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+            mAMap.addMarker(new MarkerOptions().position(latLng).icon(GREEN_MARKER));
         }
     }
 
@@ -96,6 +121,69 @@ public final class MainActivity extends AppCompatActivity implements
                 }
             }
         });
+    }
+
+    private boolean isHeatMapping;
+
+    /**
+     * RxJava2.0
+     * 背压 + 轮询热力图
+     */
+    private void pollHeatMap() {
+        Flowable.create(new FlowableOnSubscribe<TileOverlayOptions>() {
+            @Override
+            public void subscribe(FlowableEmitter<TileOverlayOptions> e) throws InterruptedException {
+
+                while (!isDestroyed()) {
+
+                    if (isHeatMapping) {
+                        VisibleRegion region = mAMap.getProjection().getVisibleRegion();
+                        CurrentLatLng latLng = LatLngFactory.INSTANCE.getCurrent(region.farLeft, region.nearRight);
+                        Response response = HeatMapApi.getInstance().liveHeatMap(latLng);
+
+                        try {
+                            if (response != null && response.code() == 200) {
+                                String responseData = Objects.requireNonNull(response.body()).string();
+                                HeatMapResponse heatMapResponse = new Gson().fromJson(responseData, HeatMapResponse.class);
+                                TileOverlayOptions options = HeatMapOverlay.getHeatMapOverlay(heatMapResponse.getPointSet());
+                                e.onNext(options);
+                            }
+                        } catch (Exception ignore) {
+
+                        }
+                    }
+
+                    Thread.sleep(sPollingInterval);
+
+                }
+
+                e.onComplete();
+
+            }
+        }, BackpressureStrategy.LATEST)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<TileOverlayOptions>() {
+                    @Override
+                    public void onSubscribe(Subscription s) {
+                        s.request(Long.MAX_VALUE);
+                    }
+
+                    @Override
+                    public void onNext(TileOverlayOptions tileOverlayOptions) {
+                        mAMap.addTileOverlay(tileOverlayOptions);
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.e(TAG, "onComplete: 结束");
+                    }
+                });
     }
 
     @Override
@@ -139,14 +227,14 @@ public final class MainActivity extends AppCompatActivity implements
         t1.setText(region.farLeft.latitude + " " + region.farLeft.longitude);
         t2.setText(region.nearRight.latitude + " " + region.nearRight.longitude);
 
+        isHeatMapping = false;
+
     }
 
     @Override
     public void onCameraChangeFinish(CameraPosition cameraPosition) {
 
-        VisibleRegion region = mAMap.getProjection().getVisibleRegion();
-        CurrentLatLng latLng = LatLngFactory.INSTANCE.getCurrent(region.farLeft, region.nearRight);
-        showLiveHeatMap(latLng);
+        isHeatMapping = true;
 
     }
 
