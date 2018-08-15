@@ -1,6 +1,7 @@
 package com.mobile.qg.qgtaxi;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -19,6 +20,8 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.TileOverlayOptions;
 import com.amap.api.maps.model.VisibleRegion;
+import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.help.Tip;
 import com.google.gson.Gson;
 import com.mobile.qg.qgtaxi.entity.CurrentLatLng;
 import com.mobile.qg.qgtaxi.entity.LatLngFactory;
@@ -27,7 +30,11 @@ import com.mobile.qg.qgtaxi.heatmap.HeatMapCallback;
 import com.mobile.qg.qgtaxi.heatmap.HeatMapLatLng;
 import com.mobile.qg.qgtaxi.heatmap.HeatMapOverlay;
 import com.mobile.qg.qgtaxi.heatmap.HeatMapResponse;
+import com.mobile.qg.qgtaxi.search.InputTipsActivity;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -36,11 +43,11 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableEmitter;
 import io.reactivex.FlowableOnSubscribe;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.Response;
@@ -70,11 +77,18 @@ public final class MainActivity extends AppCompatActivity implements
     @BindView(R.id.t2)
     protected TextView t2;
 
+    @OnClick(R.id.search)
+    public void onSearch() {
+        startActivity(new Intent(this, InputTipsActivity.class));
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        EventBus.getDefault().register(this);
 
         mMapView.onCreate(savedInstanceState);
 
@@ -82,7 +96,7 @@ public final class MainActivity extends AppCompatActivity implements
         mAMap.setOnMapClickListener(this);
         mAMap.setOnCameraChangeListener(this);
 
-        changeCamera(GUANGZHOU, false);
+        moveCamera(GUANGZHOU, false, CAMERA_ZOOM_NORMAL);
         isHeatMapping = true;
 
         requestPermission();
@@ -91,14 +105,22 @@ public final class MainActivity extends AppCompatActivity implements
 
     }
 
+    public static final int CAMERA_ZOOM_LARGE = 15;
+    public static final int CAMERA_ZOOM_NORMAL = 11;
+
     /**
      * 定位到某一经纬度
      *
      * @param latLng       经纬度
      * @param shouldMarked 是否标记
+     * @param zoom         地图缩进
      */
-    private void changeCamera(LatLng latLng, boolean shouldMarked) {
-        mAMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 11, 0, 0)));
+    private void moveCamera(LatLng latLng, boolean shouldMarked, int zoom) {
+        if (zoom == 0) {
+            mAMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+        } else {
+            mAMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, zoom, 0, 0)));
+        }
         if (shouldMarked) {
             mAMap.clear();
             mAMap.addMarker(new MarkerOptions().position(latLng).icon(GREEN_MARKER));
@@ -186,6 +208,18 @@ public final class MainActivity extends AppCompatActivity implements
                 });
     }
 
+    /**
+     * 搜索地点 + 移动Camera中心 + 地图缩进
+     *
+     * @param tip
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void getTips(Tip tip) {
+        LatLonPoint point = tip.getPoint();
+        LatLng latLng = new LatLng(point.getLatitude(), point.getLongitude());
+        moveCamera(latLng, true, CAMERA_ZOOM_LARGE);
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -196,29 +230,31 @@ public final class MainActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
         mMapView.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        isHeatMapping = true;
         mMapView.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        isHeatMapping = false;
         mMapView.onPause();
     }
 
     /**
-     * 地图点击事件
-     * （移动相机，标记）
+     * 地图点击事件 + 移动Camera中心
      *
      * @param latLng 经纬度
      */
     @Override
     public void onMapClick(LatLng latLng) {
-        changeCamera(latLng, true);
+        moveCamera(latLng, true, 0);
     }
 
     @Override
@@ -233,9 +269,7 @@ public final class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onCameraChangeFinish(CameraPosition cameraPosition) {
-
         isHeatMapping = true;
-
     }
 
     /**
