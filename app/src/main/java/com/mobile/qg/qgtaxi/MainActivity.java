@@ -4,17 +4,20 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
+import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.BitmapDescriptor;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
@@ -26,9 +29,11 @@ import com.amap.api.maps.model.VisibleRegion;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.help.Tip;
 import com.mobile.qg.qgtaxi.detail.DetailFragment;
+import com.mobile.qg.qgtaxi.entity.CurrentLatLng;
 import com.mobile.qg.qgtaxi.heatmap.HeatMap;
 import com.mobile.qg.qgtaxi.heatmap.HeatMapApi;
 import com.mobile.qg.qgtaxi.heatmap.PollingEvent;
+import com.mobile.qg.qgtaxi.route.RouteActivity;
 import com.mobile.qg.qgtaxi.route.RouteApi;
 import com.mobile.qg.qgtaxi.search.InputTipsActivity;
 import com.mobile.qg.qgtaxi.setting.*;
@@ -49,7 +54,7 @@ public final class MainActivity extends AppCompatActivity implements
     private static final String TAG = "MainActivity";
 
     //广州中心坐标
-    private static final LatLng GUANGZHOU = new LatLng(23.117055, 113.275995);
+    private static final LatLng GUANGZHOU = new LatLng(23.035219, 113.398205);
 
     //绿色标记
     private static final BitmapDescriptor GREEN_MARKER = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
@@ -74,8 +79,18 @@ public final class MainActivity extends AppCompatActivity implements
         startActivity(new Intent(this, SettingActivity.class));
     }
 
-    @BindView(R.id.iv_aim)
-    protected ImageView mLocationIv;
+    @OnClick(R.id.iv_route)
+    public void toRoute() {
+        startActivity(new Intent(this, RouteActivity.class));
+    }
+
+    @OnClick(R.id.iv_aim)
+    public void aim() {
+
+        moveCamera(GUANGZHOU, true, 0);
+
+    }
+
 
     /**
      * 切换普通地图/热力图模式
@@ -252,7 +267,7 @@ public final class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onPOIClick(Poi poi) {
+    public void onPOIClick(final Poi poi) {
         moveCamera(poi.getCoordinate(), true, 0);
         new DetailFragment()
                 .poi(poi)
@@ -260,11 +275,16 @@ public final class MainActivity extends AppCompatActivity implements
                     @Override
                     public void onChart() {
                         //调出图表
+
+
+
                     }
 
                     @Override
                     public void onRoute() {
                         //最佳路径
+                        EventBus.getDefault().postSticky(poi);
+                        startActivity(new Intent(MainActivity.this, RouteActivity.class));
                     }
                 })
                 .show(getSupportFragmentManager(), "POI");

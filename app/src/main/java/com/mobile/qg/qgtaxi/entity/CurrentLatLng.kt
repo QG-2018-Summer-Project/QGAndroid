@@ -1,5 +1,7 @@
 package com.mobile.qg.qgtaxi.entity
 
+import java.io.Serializable
+
 /**
  * Created by 11234 on 2018/8/12.
  * 当前时间 某一区域/点的标准上传类
@@ -35,4 +37,4 @@ data class CurrentLatLng(
 
         var currentTime: String
 
-)
+) : Serializable
