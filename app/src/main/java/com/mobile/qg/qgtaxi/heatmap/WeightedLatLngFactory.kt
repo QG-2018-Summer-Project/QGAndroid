@@ -7,10 +7,11 @@ import java.util.ArrayList
 
 /**
  * Created by 11234 on 2018/8/12.
+ * 权重经纬度的工厂类
  */
 object WeightedLatLngFactory {
 
-    fun getWeightedLatLng(heatMapLatLng: HeatMapLatLng): WeightedLatLng {
+    private fun getWeightedLatLng(heatMapLatLng: HeatMapLatLng): WeightedLatLng {
         return WeightedLatLng(LatLng(heatMapLatLng.lat, heatMapLatLng.lon), heatMapLatLng.weight.toDouble())
     }
 

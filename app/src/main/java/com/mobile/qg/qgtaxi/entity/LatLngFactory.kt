@@ -8,6 +8,7 @@ import java.util.Locale
 
 /**
  * Created by 11234 on 2018/8/12.
+ * 经纬度工厂类
  */
 object LatLngFactory {
 

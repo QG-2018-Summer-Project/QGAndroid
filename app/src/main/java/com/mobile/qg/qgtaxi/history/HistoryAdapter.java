@@ -1,4 +1,4 @@
-package com.mobile.qg.qgtaxi.search;
+package com.mobile.qg.qgtaxi.history;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -14,11 +14,11 @@ import com.mobile.qg.qgtaxi.R;
 
 import java.util.List;
 
-import static com.mobile.qg.qgtaxi.search.HistoryFactory.fromHistory;
-
+import static com.mobile.qg.qgtaxi.history.HistoryFactory.fromHistory;
 
 /**
  * Created by 11234 on 2018/8/15.
+ * 历史纪录列表的适配器
  */
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHolder> {
 
@@ -39,11 +39,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
     public HistoryAdapter(List<History> mHistories) {
         this.mHistories = mHistories;
-    }
-
-    public void refresh(List<History> tips) {
-        mHistories = tips;
-        notifyDataSetChanged();
     }
 
     @NonNull
@@ -68,7 +63,12 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         holder.mDeleteIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (callback != null) {
+                    History history = mHistories.get(holder.getAdapterPosition());
+                    mHistories.remove(history);
+                    notifyDataSetChanged();
+                    callback.onDeleteHistory(history);
+                }
             }
         });
 

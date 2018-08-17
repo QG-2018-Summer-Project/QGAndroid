@@ -1,14 +1,12 @@
-package com.mobile.qg.qgtaxi.search
+package com.mobile.qg.qgtaxi.history
 
 import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 
-import com.amap.api.services.core.LatLonPoint
-import com.amap.api.services.help.Tip
-
 /**
  * Created by 11234 on 2018/8/15.
+ * 历史记录实体类
  */
 @Entity(tableName = "history")
 data class History(

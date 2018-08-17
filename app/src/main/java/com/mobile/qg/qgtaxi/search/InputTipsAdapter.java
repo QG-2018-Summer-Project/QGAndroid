@@ -11,14 +11,12 @@ import android.widget.TextView;
 import com.amap.api.services.help.Tip;
 import com.mobile.qg.qgtaxi.R;
 
-import org.greenrobot.eventbus.EventBus;
-
-import java.util.ArrayList;
 import java.util.List;
 
 
 /**
  * Created by 11234 on 2018/8/15.
+ * 输入提示列表的适配器
  */
 public class InputTipsAdapter extends RecyclerView.Adapter<InputTipsAdapter.ViewHolder> {
 
@@ -35,7 +33,7 @@ public class InputTipsAdapter extends RecyclerView.Adapter<InputTipsAdapter.View
         this.callback = callback;
     }
 
-    public InputTipsAdapter(List<Tip> mTips) {
+    InputTipsAdapter(List<Tip> mTips) {
         this.mTips = mTips;
     }
 

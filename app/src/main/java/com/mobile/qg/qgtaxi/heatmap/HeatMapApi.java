@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.mobile.qg.qgtaxi.entity.CurrentLatLng;
 import com.mobile.qg.qgtaxi.entity.PeriodLatLng;
+import com.mobile.qg.qgtaxi.entity.PredictedLatLng;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -27,21 +28,27 @@ import static android.content.ContentValues.TAG;
  */
 public class HeatMapApi {
 
-    private final static String IP = "localhost";
+    /**
+     * Changeable
+     */
+    private static String IP = "localhost";
+    private static long sConnectTimeOut = 5000;
+
+
     private final static String ROOT = "http://" + IP + ":8080/qgtaxi/";
     private final static String MAPS = "maps/";
 
-    private final static String CURRENT_HEATMAP = ROOT + MAPS + "liveheatmap";
-    private final static String PERIOD_HEATMAP = ROOT + MAPS + "querymap";
-
-    private static final long CONNECT_TIMEOUT = 5000;
+    private final static String CURRENT = ROOT + MAPS + "liveheatmap";
+    private final static String PERIOD = ROOT + MAPS + "querymap";
+    private static final String DEMAND = ROOT + MAPS + "demanded";
+    private static final String COUNT = ROOT + MAPS + "count";
 
     /**
      * 单例
      */
     private static final HeatMapApi ourInstance = new HeatMapApi();
 
-    public static HeatMapApi getInstance() {
+    public synchronized static HeatMapApi getInstance() {
         return ourInstance;
     }
 
@@ -58,7 +65,7 @@ public class HeatMapApi {
     private Response post(@NonNull String action, @NonNull String jsonBody) {
         Log.e(TAG, "post: " + jsonBody);
         OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
+                .connectTimeout(sConnectTimeOut, TimeUnit.MILLISECONDS)
                 .build();
         RequestBody requestBody = FormBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
         Request request = new Request.Builder()
@@ -86,7 +93,7 @@ public class HeatMapApi {
     private void post(@NonNull String action, @NonNull String jsonBody, Callback callback) {
         Log.e(TAG, "post: " + jsonBody);
         OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
+                .connectTimeout(sConnectTimeOut, TimeUnit.MILLISECONDS)
                 .build();
         RequestBody requestBody = FormBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
         Request request = new Request.Builder()
@@ -99,19 +106,54 @@ public class HeatMapApi {
     }
 
     public Response liveHeatMap(CurrentLatLng latLng) {
-        return post(CURRENT_HEATMAP, new Gson().toJson(latLng));
+        return post(CURRENT, new Gson().toJson(latLng));
     }
 
-    public Response periodHeatMap(PeriodLatLng latLng) {
-        return post(PERIOD_HEATMAP, new Gson().toJson(latLng));
-    }
-
-    public void liveHeatMap(CurrentLatLng latLng, Callback callback) {
-        post(CURRENT_HEATMAP, new Gson().toJson(latLng), callback);
-    }
 
     public void periodHeatMap(PeriodLatLng latLng, Callback callback) {
-        post(PERIOD_HEATMAP, new Gson().toJson(latLng), callback);
+        post(PERIOD, new Gson().toJson(latLng), callback);
     }
+
+    public void predictedDemand(PredictedLatLng latLng, Callback callback) {
+        post(DEMAND, new Gson().toJson(latLng), callback);
+    }
+
+    public void predictedCount(PredictedLatLng latLng, Callback callback) {
+        post(COUNT, new Gson().toJson(latLng), callback);
+    }
+
+
+    /**
+     * Builder模式
+     * 设置连接超时/ip地址
+     */
+    private final static ApiEditor API_EDITOR = new ApiEditor();
+
+    public final static class ApiEditor {
+
+        private String ip;
+        private long timeOut;
+
+        public ApiEditor connectTimeOut(long time) {
+            timeOut = time;
+            return API_EDITOR;
+        }
+
+        public ApiEditor ip(String ip) {
+            this.ip = ip;
+            return API_EDITOR;
+        }
+
+        public void accept() {
+            sConnectTimeOut = timeOut;
+            IP = ip;
+        }
+
+    }
+
+    public ApiEditor edit() {
+        return API_EDITOR;
+    }
+
 
 }

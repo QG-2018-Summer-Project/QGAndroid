@@ -8,6 +8,11 @@ package com.mobile.qg.qgtaxi.heatmap
 data class HeatMapResponse(
 
         /**
+         * 状态码
+         */
+        var status: Int,
+
+        /**
          * 热力图中点的集合
          */
         var pointSet: List<HeatMapLatLng>

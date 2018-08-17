@@ -15,8 +15,8 @@ import com.amap.api.services.help.Inputtips;
 import com.amap.api.services.help.Inputtips.InputtipsListener;
 import com.amap.api.services.help.InputtipsQuery;
 import com.amap.api.services.help.Tip;
-import com.google.gson.Gson;
 import com.mobile.qg.qgtaxi.R;
+import com.mobile.qg.qgtaxi.history.History;
 import com.mobile.qg.qgtaxi.history.HistoryAdapter;
 import com.mobile.qg.qgtaxi.history.HistoryDatabase;
 import com.mobile.qg.qgtaxi.history.HistoryFactory;
@@ -46,7 +46,6 @@ public class InputTipsActivity extends AppCompatActivity implements
         HistoryAdapter.HistoriesCallback {
 
     private final static String CITY = "广州";
-    private AutoCompleteTextView mKeywordText;
     private RecyclerView mTipList;
     private InputTipsAdapter mAdapter;
     private ProgressBar mProgressBar;
@@ -58,7 +57,7 @@ public class InputTipsActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_inputtip);
         mTipList = findViewById(R.id.inputlist);
         mTipList.setLayoutManager(new LinearLayoutManager(this));
-        mKeywordText = findViewById(R.id.input_edittext);
+        AutoCompleteTextView mKeywordText = findViewById(R.id.input_edittext);
         mKeywordText.addTextChangedListener(this);
         mProgressBar = findViewById(R.id.pro);
         getHistory();
@@ -102,7 +101,6 @@ public class InputTipsActivity extends AppCompatActivity implements
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count,
                                   int after) {
-        // TODO Auto-generated method stub
 
     }
 
@@ -121,7 +119,6 @@ public class InputTipsActivity extends AppCompatActivity implements
 
     @Override
     public void afterTextChanged(Editable s) {
-        // TODO Auto-generated method stub
 
     }
 

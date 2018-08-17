@@ -1,4 +1,4 @@
-package com.mobile.qg.qgtaxi.search;
+package com.mobile.qg.qgtaxi.history;
 
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.help.Tip;
@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * Created by 11234 on 2018/8/15.
+ * 工厂类/转换Tip和History
  */
 public class HistoryFactory {
 
@@ -24,7 +25,7 @@ public class HistoryFactory {
 
     }
 
-    public static List<Tip> fromHistory(List<History> histories) {
+    static List<Tip> fromHistory(List<History> histories) {
 
         List<Tip> tips = new ArrayList<>();
         for (History history : histories) {
@@ -35,7 +36,7 @@ public class HistoryFactory {
         return tips;
     }
 
-    public static Tip fromHistory(History history) {
+    static Tip fromHistory(History history) {
 
         Tip tip = new Tip();
         tip.setID(history.getId());

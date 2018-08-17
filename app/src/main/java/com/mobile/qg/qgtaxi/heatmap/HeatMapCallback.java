@@ -30,7 +30,7 @@ public abstract class HeatMapCallback implements Callback {
 
         String responseData = Objects.requireNonNull(response.body()).string();
         HeatMapResponse heatMapResponse = new Gson().fromJson(responseData, HeatMapResponse.class);
-        result(200, heatMapResponse.getPointSet());
+        result(heatMapResponse.getStatus(), heatMapResponse.getPointSet());//null point？
 
     }
 
