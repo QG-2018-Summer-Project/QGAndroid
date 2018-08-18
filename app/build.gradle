@@ -71,6 +71,9 @@ dependencies {
 //    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:+' /*微信*/
+
 }
 repositories {
     mavenCentral()

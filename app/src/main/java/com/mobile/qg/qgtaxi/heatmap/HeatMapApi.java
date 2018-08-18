@@ -100,6 +100,7 @@ public class HeatMapApi {
      */
     private void post(@NonNull String action, @NonNull String jsonBody, Callback callback) {
         Log.e(TAG, "post: " + jsonBody);
+        Log.e(TAG, "post: " + action);
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(sConnectTimeOut, TimeUnit.MILLISECONDS)
                 .build();

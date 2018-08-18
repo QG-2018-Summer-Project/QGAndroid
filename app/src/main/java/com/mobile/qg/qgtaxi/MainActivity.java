@@ -20,9 +20,13 @@ import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.Poi;
+import com.amap.api.maps.model.VisibleRegion;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.help.Tip;
+import com.mobile.qg.qgtaxi.chart.ChartActivity;
+import com.mobile.qg.qgtaxi.chart.ChartApi;
 import com.mobile.qg.qgtaxi.detail.DetailFragment;
+import com.mobile.qg.qgtaxi.entity.CurrentLatLng;
 import com.mobile.qg.qgtaxi.heatmap.HeatMap;
 import com.mobile.qg.qgtaxi.heatmap.HeatMapApi;
 import com.mobile.qg.qgtaxi.heatmap.PollingEvent;
@@ -159,6 +163,11 @@ public final class MainActivity extends AppCompatActivity implements
                 .connectTimeOut(event.getTimeOut())
                 .ip(event.getIp())
                 .accept();
+        ChartApi.getInstance()
+                .edit()
+                .connectTimeOut(event.getTimeOut())
+                .ip(event.getIp())
+                .accept();
 
     }
 
@@ -228,6 +237,15 @@ public final class MainActivity extends AppCompatActivity implements
                     @Override
                     public void onChart() {
                         //调出图表
+
+                        VisibleRegion region = mAMap.getProjection().getVisibleRegion();
+                        CurrentLatLng latLng = new CurrentLatLng(
+                                region.farLeft.latitude, region.farLeft.longitude,
+                                region.nearRight.latitude, region.nearRight.longitude, "2017-02-07 16:00:00");
+
+                        Intent intent = new Intent(MainActivity.this, ChartActivity.class);
+                        intent.putExtra(KeyValueConstant.KEY_CHART_ACTIVITY, latLng);
+                        startActivity(intent);
 
 
                     }

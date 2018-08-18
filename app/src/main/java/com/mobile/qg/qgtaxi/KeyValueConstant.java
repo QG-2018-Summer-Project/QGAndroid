@@ -18,5 +18,7 @@ public class KeyValueConstant {
     public static final int VALUE_ROUTE_START = 1;
     public static final int VALUE_ROUTE_END = 2;
 
+    public static final String KEY_CHART_ACTIVITY="chart";//图表activity传值的intent的key
+
 
 }
