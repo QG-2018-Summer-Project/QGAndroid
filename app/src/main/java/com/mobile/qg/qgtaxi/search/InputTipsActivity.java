@@ -28,6 +28,8 @@ import org.reactivestreams.Subscription;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -35,6 +37,10 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+
+import static com.mobile.qg.qgtaxi.KeyValueConstant.KEY_ROUTE;
+import static com.mobile.qg.qgtaxi.KeyValueConstant.VALUE_ROUTE_END;
+import static com.mobile.qg.qgtaxi.KeyValueConstant.VALUE_ROUTE_START;
 
 /**
  * 输入提示功能实现
@@ -46,21 +52,32 @@ public class InputTipsActivity extends AppCompatActivity implements
         HistoryAdapter.HistoriesCallback {
 
     private final static String CITY = "广州";
-    private RecyclerView mTipList;
-    private InputTipsAdapter mAdapter;
-    private ProgressBar mProgressBar;
 
+    @BindView(R.id.inputlist)
+    protected RecyclerView mTipList;
+
+    @BindView(R.id.pro)
+    protected ProgressBar mProgressBar;
+
+    @BindView(R.id.input_edittext)
+    AutoCompleteTextView mKeywordText;
+
+    private InputTipsAdapter mAdapter;
+    private int mPurpose;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inputtip);
-        mTipList = findViewById(R.id.inputlist);
+        ButterKnife.bind(this);
+
+        mPurpose = getIntent().getIntExtra(KEY_ROUTE, 0);
+
         mTipList.setLayoutManager(new LinearLayoutManager(this));
-        AutoCompleteTextView mKeywordText = findViewById(R.id.input_edittext);
         mKeywordText.addTextChangedListener(this);
-        mProgressBar = findViewById(R.id.pro);
+
         getHistory();
+
 
     }
 
@@ -168,7 +185,7 @@ public class InputTipsActivity extends AppCompatActivity implements
 
                     @Override
                     public void onNext(Tip t) {
-                        EventBus.getDefault().post(tip);
+                        sendTip(t);
                         finish();
                     }
 
@@ -187,8 +204,28 @@ public class InputTipsActivity extends AppCompatActivity implements
 
     @Override
     public void onClickHistory(Tip tip) {
-        EventBus.getDefault().post(tip);
+        sendTip(tip);
         finish();
+    }
+
+    private void sendTip(Tip tip) {
+        if (mPurpose == 0) {
+            EventBus.getDefault().post(tip);
+        } else if (mPurpose == VALUE_ROUTE_START) {
+            SearchEvent event = SearchEvent.builder()
+                    .purpose(SearchEvent.Purpose.START)
+                    .name(tip.getName())
+                    .point(tip.getPoint())
+                    .build();
+            EventBus.getDefault().post(event);
+        } else if (mPurpose == VALUE_ROUTE_END) {
+            SearchEvent event = SearchEvent.builder()
+                    .purpose(SearchEvent.Purpose.END)
+                    .name(tip.getName())
+                    .point(tip.getPoint())
+                    .build();
+            EventBus.getDefault().post(event);
+        }
     }
 
     @Override

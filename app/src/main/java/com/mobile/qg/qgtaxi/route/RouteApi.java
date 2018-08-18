@@ -60,14 +60,6 @@ public class RouteApi {
      * @param jsonBody json内容体
      */
     private Response post(@NonNull String action, @NonNull String jsonBody) {
-
-        try {
-            FileOutputStream outputStream = new FileOutputStream("/storage/emulated/0/a/a.txt");
-            outputStream.write(jsonBody.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(sConnectTimeOut, TimeUnit.MILLISECONDS)
                 .build();

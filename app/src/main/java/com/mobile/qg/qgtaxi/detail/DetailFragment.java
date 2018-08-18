@@ -7,8 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.CardView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,24 +18,11 @@ import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 import com.amap.api.maps.model.Poi;
-import com.amap.api.services.core.AMapException;
-import com.amap.api.services.core.PoiItem;
-import com.amap.api.services.poisearch.PoiResult;
-import com.amap.api.services.poisearch.PoiSearch;
 import com.mobile.qg.qgtaxi.R;
-
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by 11234 on 2018/7/27.
+ * 点击兴趣点后的底部Fragment
  */
 public class DetailFragment extends DialogFragment {
 
@@ -45,6 +30,13 @@ public class DetailFragment extends DialogFragment {
         void onChart();
 
         void onRoute();
+
+        void onPrevious();
+
+        void onPredictCount();
+
+        void onPredictDemand();
+
     }
 
     private OnBottomItemClickListener mItemClickListener;
@@ -88,7 +80,6 @@ public class DetailFragment extends DialogFragment {
         }
 
         ((TextView) mView.findViewById(R.id.tv_name)).setText(mPoi.getName());
-//        ((TextView)mView.findViewById(R.id.tv_address)).setText(mPoi.getName());
         mView.findViewById(R.id.cd_best).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -101,6 +92,33 @@ public class DetailFragment extends DialogFragment {
             public void onClick(View view) {
                 if (mItemClickListener != null) {
                     mItemClickListener.onChart();
+                }
+            }
+        });
+
+        mView.findViewById(R.id.btn_bottom_predict_count).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mItemClickListener != null) {
+                    mItemClickListener.onPredictCount();
+                }
+            }
+        });
+
+        mView.findViewById(R.id.btn_bottom_predict_demand).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mItemClickListener != null) {
+                    mItemClickListener.onPredictDemand();
+                }
+            }
+        });
+
+        mView.findViewById(R.id.btn_bottom_previous).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mItemClickListener != null) {
+                    mItemClickListener.onPrevious();
                 }
             }
         });

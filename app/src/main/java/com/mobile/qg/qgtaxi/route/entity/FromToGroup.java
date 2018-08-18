@@ -2,9 +2,12 @@ package com.mobile.qg.qgtaxi.route.entity;
 
 import com.amap.api.services.core.LatLonPoint;
 
+import lombok.Data;
+
 /**
  * Created by 11234 on 2018/8/17.
  */
+@Data
 public class FromToGroup {
 
     private LatLonPoint startPoint;
@@ -29,9 +32,9 @@ public class FromToGroup {
         return startPoint != null && endPoint != null && startName != null && endName != null;
     }
 
-    public void reverse() {
+    public boolean reverse() {
         if (!available()) {
-            return;
+            return false;
         }
         LatLonPoint temp = startPoint;
         startPoint = endPoint;
@@ -40,21 +43,8 @@ public class FromToGroup {
         String tmp = startName;
         startName = endName;
         endName = tmp;
+
+        return true;
     }
 
-    public LatLonPoint getStartPoint() {
-        return startPoint;
-    }
-
-    public LatLonPoint getEndPoint() {
-        return endPoint;
-    }
-
-    public String getStartName() {
-        return startName;
-    }
-
-    public String getEndName() {
-        return endName;
-    }
 }

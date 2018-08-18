@@ -34,7 +34,7 @@ public class SettingFragment extends PreferenceFragment implements SharedPrefere
     private EditTextPreference timeEt;
 
     private SharedPreferences sharedPreferences;
-    private static final String regex = "[a-zA-z]+://[^\\s]*";/*验证url的正则表达式，准确度未知*/
+    private static final String regex = "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}";/*验证url的正则表达式，准确度未知*/
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,8 +48,8 @@ public class SettingFragment extends PreferenceFragment implements SharedPrefere
 
     private void setSummary() {
         urlEt.setSummary("当前的服务器地址:" + sharedPreferences.getString(KEY_URL, DEFAULT_URL));
-        timeoutEt.setSummary(sharedPreferences.getString(KEY_TIMEOUT, "默认为10") + "秒(请输入数字)");
-        timeEt.setSummary(sharedPreferences.getString(KEY_PERIOD, "默认为5") + "秒(请输入数字)");
+        timeoutEt.setSummary(sharedPreferences.getString(KEY_TIMEOUT, "默认为10000") + "毫秒(请输入毫秒)");
+        timeEt.setSummary(sharedPreferences.getString(KEY_PERIOD, "默认为5000") + "毫秒(请输入毫秒)");
     }
 
     @Override
@@ -87,12 +87,12 @@ public class SettingFragment extends PreferenceFragment implements SharedPrefere
                 break;
             case KEY_TIMEOUT:
                 String timeOut = sharedPreferences.getString(KEY_TIMEOUT, DEFAULT_TIMEOUT);
-                timeoutEt.setSummary("默认为" + timeOut + "秒(请输入数字)");
+                timeoutEt.setSummary("默认为" + timeOut + "毫秒(请输入毫秒)");
                 EventBus.getDefault().post(new SettingEvent(sharedPreferences));
                 break;
             case KEY_PERIOD:
                 String period = sharedPreferences.getString(KEY_PERIOD, DEFAULT_PERIOD);
-                timeEt.setSummary("默认为" + period + "秒(请输入数字)");
+                timeEt.setSummary("默认为" + period + "毫秒(请输入毫秒)");
                 EventBus.getDefault().post(new PollingEvent(sharedPreferences));
                 break;
             default:
@@ -102,9 +102,10 @@ public class SettingFragment extends PreferenceFragment implements SharedPrefere
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
+        String value = newValue.toString();
         switch (preference.getKey()) {
             case KEY_URL:
-                if (Pattern.matches(regex, newValue.toString())) {
+                if (Pattern.matches(regex, value)) {
                     Toast.makeText(getActivity(), "修改服务器地址成功", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getActivity(), "IP地址不合法", Toast.LENGTH_SHORT).show();
@@ -114,10 +115,18 @@ public class SettingFragment extends PreferenceFragment implements SharedPrefere
                 urlEt.setSummary("当前的服务器地址:" + sharedPreferences.getString(KEY_URL, DEFAULT_URL));
                 break;
             case KEY_TIMEOUT:
+                if (Integer.parseInt(value) < 5000) {
+                    Toast.makeText(getActivity(), "连接超时不能低于5秒", Toast.LENGTH_LONG).show();
+                    return false;
+                }
                 /*输入框限制只能输入数字了，所以这里暂时没有判断*/
                 break;
             case KEY_PERIOD:
                 /*输入框限制只能输入数字了，所以这里暂时没有判断*/
+                if (Integer.parseInt(value) < 5000) {
+                    Toast.makeText(getActivity(), "轮询间隔不能低于5秒", Toast.LENGTH_LONG).show();
+                    return false;
+                }
                 break;
         }
         return true;

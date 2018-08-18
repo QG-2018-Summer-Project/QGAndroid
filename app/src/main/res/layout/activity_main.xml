@@ -11,25 +11,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <TextView
-        android:id="@+id/t1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
-        android:textColor="#000000"
-        android:textSize="20sp" />
-
-    <TextView
-        android:id="@+id/t2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:textColor="#000000"
-        android:textSize="20sp" />
-
     <include
         android:id="@+id/search"
-        layout="@layout/search"
+        layout="@layout/layout_search"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_margin="10dp" />

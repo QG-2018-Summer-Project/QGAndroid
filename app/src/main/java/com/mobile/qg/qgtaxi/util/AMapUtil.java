@@ -16,44 +16,6 @@ import java.util.Date;
 import java.util.List;
 
 public class AMapUtil {
-	/**
-	 * 判断edittext是否null
-	 */
-	public static String checkEditText(EditText editText) {
-		if (editText != null && editText.getText() != null
-				&& !(editText.getText().toString().trim().equals(""))) {
-			return editText.getText().toString().trim();
-		} else {
-			return "";
-		}
-	}
-
-	public static Spanned stringToSpan(String src) {
-		return src == null ? null : Html.fromHtml(src.replace("\n", "<br />"));
-	}
-
-	public static String colorFont(String src, String color) {
-		StringBuffer strBuf = new StringBuffer();
-
-		strBuf.append("<font color=").append(color).append(">").append(src)
-				.append("</font>");
-		return strBuf.toString();
-	}
-
-	public static String makeHtmlNewLine() {
-		return "<br />";
-	}
-
-	public static String makeHtmlSpace(int number) {
-		final String space = "&nbsp;";
-		StringBuilder result = new StringBuilder();
-		for (int i = 0; i < number; i++) {
-			result.append(space);
-		}
-		return result.toString();
-	}
-
-
 
 	public static boolean IsEmptyOrNullString(String s) {
 		return (s == null) || (s.trim().length() == 0);

@@ -10,7 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <include layout="@layout/layout_route" />
+    <include
+        android:id="@+id/cd_route_head"
+        layout="@layout/layout_route" />
 
     <Button
         android:id="@+id/btn_route_start"
@@ -21,5 +23,21 @@
         android:background="@drawable/shape_start_route"
         android:text="开始规划"
         android:textColor="#FFFFFF" />
+
+    <ProgressBar
+        android:id="@+id/pb_route"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/colorPrimary"
+        android:visibility="gone" />
+
+    <include
+        android:id="@+id/rl_route_bottom"
+        layout="@layout/layout_route_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_gravity="bottom"
+        android:visibility="gone" />
 
 </FrameLayout>

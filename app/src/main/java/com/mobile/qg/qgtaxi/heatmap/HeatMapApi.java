@@ -31,22 +31,19 @@ public class HeatMapApi {
     /**
      * Changeable
      */
-    private static String IP = "localhost";
-    private static long sConnectTimeOut = 5000;
+    private String IP = "localhost";
+    private long sConnectTimeOut = 10000;
+    private String ROOT = "http://" + IP + ":8080/qgtaxi/maps/";
 
-
-    private final static String ROOT = "http://" + IP + ":8080/qgtaxi/";
-    private final static String MAPS = "maps/";
-
-    private final static String CURRENT = ROOT + MAPS + "liveheatmap";
-    private final static String PERIOD = ROOT + MAPS + "querymap";
-    private static final String DEMAND = ROOT + MAPS + "demanded";
-    private static final String COUNT = ROOT + MAPS + "count";
+    private final static String CURRENT = "liveheatmap";
+    private final static String PERIOD = "querymap";
+    private static final String DEMAND = "demanded";
+    private static final String COUNT = "count";
 
     /**
      * 单例
      */
-    private static final HeatMapApi ourInstance = new HeatMapApi();
+    private static HeatMapApi ourInstance = new HeatMapApi();
 
     public synchronized static HeatMapApi getInstance() {
         return ourInstance;
@@ -64,22 +61,33 @@ public class HeatMapApi {
      */
     private Response post(@NonNull String action, @NonNull String jsonBody) {
         Log.e(TAG, "post: " + jsonBody);
+        Log.e(TAG, "post: " + action);
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(sConnectTimeOut, TimeUnit.MILLISECONDS)
                 .build();
-        RequestBody requestBody = FormBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
         Request request = new Request.Builder()
                 .url(action)
                 .post(requestBody)
                 .build();
 
-        Call call = client.newCall(request);
         try {
-            return call.execute();
+            Response response = client.newCall(request).execute();
+            Log.e(TAG, "post: " + response.code());
+            Log.e(TAG, "post: " + response.isSuccessful());
+            return response;
         } catch (IOException e) {
             e.printStackTrace();
+            Log.e(TAG, "post: fa" + e.toString());
+            return null;
         }
-        return null;
+//        Call call = client.newCall(request);
+//        try {
+//            return call.execute();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
     }
 
     /**
@@ -106,20 +114,20 @@ public class HeatMapApi {
     }
 
     public Response liveHeatMap(CurrentLatLng latLng) {
-        return post(CURRENT, new Gson().toJson(latLng));
+        return post(ROOT + CURRENT, new Gson().toJson(latLng));
     }
 
 
     public void periodHeatMap(PeriodLatLng latLng, Callback callback) {
-        post(PERIOD, new Gson().toJson(latLng), callback);
+        post(ROOT + PERIOD, new Gson().toJson(latLng), callback);
     }
 
     public void predictedDemand(PredictedLatLng latLng, Callback callback) {
-        post(DEMAND, new Gson().toJson(latLng), callback);
+        post(ROOT + DEMAND, new Gson().toJson(latLng), callback);
     }
 
     public void predictedCount(PredictedLatLng latLng, Callback callback) {
-        post(COUNT, new Gson().toJson(latLng), callback);
+        post(ROOT + COUNT, new Gson().toJson(latLng), callback);
     }
 
 
@@ -145,8 +153,9 @@ public class HeatMapApi {
         }
 
         public void accept() {
-            sConnectTimeOut = timeOut;
-            IP = ip;
+            getInstance().sConnectTimeOut = timeOut;
+            getInstance().IP = ip;
+            getInstance().ROOT = "http://" + ip + ":8080/qgtaxi/maps/";
         }
 
     }

@@ -16,15 +16,12 @@ import com.mobile.qg.qgtaxi.R;
 
 public class SettingActivity extends Activity {
 
-    private SettingFragment mSettingsFragment;
-    private static final String TAG = "SettingActivity";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         if (savedInstanceState == null) {
-            mSettingsFragment = new SettingFragment();
+            SettingFragment mSettingsFragment = new SettingFragment();
             replaceFragment(R.id.settings_container, mSettingsFragment);
 
         }

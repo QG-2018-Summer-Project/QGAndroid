@@ -50,7 +50,7 @@ public class InputTipsAdapter extends RecyclerView.Adapter<InputTipsAdapter.View
             mContext = parent.getContext();
         }
 
-        View view = LayoutInflater.from(mContext).inflate(R.layout.item_layout, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.item_tips, parent, false);
         final ViewHolder holder = new ViewHolder(view);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

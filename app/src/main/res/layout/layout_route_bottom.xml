@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="90dp"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:id="@+id/tv_route_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="20dp"
+        android:text="2分钟"
+        android:textColor="#1F1F1F"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/tv_route_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="10dp"
+        android:layout_toEndOf="@id/tv_route_time"
+        android:text="2分钟"
+        android:textColor="#1F1F1F"
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/btn_route_end"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/shape_start_route"
+        android:text="关闭推荐"
+        android:textColor="#FFFFFF" />
+
+</RelativeLayout>

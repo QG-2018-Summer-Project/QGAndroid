@@ -1,6 +1,7 @@
 package com.mobile.qg.qgtaxi.entity
 
 import com.amap.api.maps.model.LatLng
+import com.mobile.qg.qgtaxi.util.TimeUtil
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -19,7 +20,7 @@ object LatLngFactory {
                 farLeft.latitude,
                 nearRight.longitude,
                 nearRight.latitude,
-                FORMATTER.format(Date()))
+                TimeUtil.getTime())
     }
 
     fun getPeriod(farLeft: LatLng, nearRight: LatLng, start: Long, end: Long): PeriodLatLng {
@@ -29,6 +30,15 @@ object LatLngFactory {
                 nearRight.latitude,
                 FORMATTER.format(Date(start)),
                 FORMATTER.format(Date(end)))
+    }
+
+
+    fun getPredict(farLeft: LatLng, nearRight: LatLng): PredictedLatLng {
+        return PredictedLatLng(farLeft.longitude,
+                farLeft.latitude,
+                nearRight.longitude,
+                nearRight.latitude,
+                TimeUtil.getPredictedTime())
     }
 
 

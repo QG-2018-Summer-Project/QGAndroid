@@ -56,7 +56,6 @@
             android:layout_toEndOf="@id/link"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:hint="输入起点"
             android:maxLines="1"
             android:text="我的位置"
             android:textColor="#1F1F1F"

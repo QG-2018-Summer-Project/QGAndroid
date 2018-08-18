@@ -56,8 +56,10 @@ public class RouteFactory {
                 steps.add(step);
             }
 
-            Route route = new Route(index, steps, allTime, allDistance);
-            index++;
+            Log.e(TAG, "getRoutes: " + allTime);
+            Log.e(TAG, "getRoutes: " + allDistance);
+
+            Route route = new Route(index++, steps, allTime, allDistance);
             routes.add(route);
 
         }

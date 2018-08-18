@@ -2,6 +2,7 @@ package com.mobile.qg.qgtaxi.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -11,25 +12,45 @@ import java.util.Locale;
 public class TimeUtil {
 
     private final static SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-    private final static String START = "2017-02-07 16:00:00";
-    private final static String NOW = "2018-8-17 16:00:00";
+    private final static long ORIGIN = 1486454400000L; //2017-02-07 16:00:00
+    private final static String START = "2018-8-17 16:00:00";
 
     public static String getTime() {
-        long start = 0;
+
+        Calendar calendar = (Calendar) Calendar.getInstance().clone();
+        calendar.set(Calendar.YEAR, 2017);
+        calendar.set(Calendar.MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+
+//        long start = 0;
+//        try {
+//            start = FORMATTER.parse(START).getTime();
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//
+//        long now = new Date().getTime();
+//        long offset = now - start;
+
+        return FORMATTER.format(calendar.getTime());
+    }
+
+    public static String getPredictedTime() {
+        Calendar calendar = (Calendar) Calendar.getInstance().clone();
+        calendar.set(Calendar.YEAR, 2017);
+        calendar.set(Calendar.MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH, 7);
+        return FORMATTER.format(calendar.getTime());
+    }
+
+    public static long getLong(String time) {
         try {
-            start = FORMATTER.parse("2017-02-07 16:00:00").getTime();
+            return FORMATTER.parse(time).getTime();
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
-        long now = new Date().getTime();
-        long offset = now - start;
-
-        return FORMATTER.format(new Date(start + offset));
+        return ORIGIN;
     }
 
-    public static String getDeadTime() {
-        return START;
-    }
 
 }

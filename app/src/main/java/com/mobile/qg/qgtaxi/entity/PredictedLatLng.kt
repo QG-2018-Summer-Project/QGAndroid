@@ -4,7 +4,8 @@ package com.mobile.qg.qgtaxi.entity
  * Created by 11234 on 2018/8/16.
  * 预测
  */
-data class PredictedLatLng(
+data class
+PredictedLatLng(
 
         /**
          * 左上角经度
