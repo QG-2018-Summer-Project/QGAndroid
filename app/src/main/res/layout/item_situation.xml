@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="64dp">
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/iv_situation_rv_case"
+        android:src="@drawable/icon_increase"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="30dp"
+        android:layout_alignParentBottom="true"/>
+
+    <TextView
+        android:id="@+id/tv_situation_rv_case"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/tv_situation_rv_location"
+        android:layout_alignStart="@+id/tv_situation_rv_location"
+        android:layout_marginTop="3dp"
+        android:text="数量剧增"
+        android:textColor="#f7931e"
+        android:layout_marginBottom="2dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tv_situation_rv_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/iv_situation_rv_case"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="2dp"
+        android:layout_toEndOf="@+id/iv_situation_rv_case"
+        android:text="位置：xx，xx"
+        android:textColor="#1f1f1f"
+        android:textSize="12sp" />
+
+</RelativeLayout>

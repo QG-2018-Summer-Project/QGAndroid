@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.mobile.qg.qgtaxi.situation.SituationDetailActivity">
+
+    <include layout="@layout/item_situation" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:text="此处出现了数据异常情况"
+        android:textColor="#f71e46"
+        android:textSize="16sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:gravity="center"
+        android:text="详细原因"
+        android:textColor="#1f1f1f"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tv_situation_reason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:layout_marginTop="20dp"
+        android:text="原因"
+        android:textColor="#424242" />
+
+</LinearLayout>

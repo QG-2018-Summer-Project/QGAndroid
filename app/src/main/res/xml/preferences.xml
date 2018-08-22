@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout="@layout/preference_item"
+    android:title="设置">
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="网络设置">
+
+        <EditTextPreference
+            android:hint="输入格式为：（后期回来补）"
+            android:inputType="textUri"
+            android:key="KEY_URL"
+            android:layout="@layout/preference_item"
+            android:summary="当前的服务器地址：http：//23333"
+            android:title="服务器地址" />
+        <EditTextPreference
+            android:inputType="number"
+            android:key="KEY_TIMEOUT"
+            android:layout="@layout/preference_item"
+            android:numeric="integer"
+            android:summary="5秒(请输入数字)"
+            android:title="超时时间" />
+        <EditTextPreference
+            android:inputType="number"
+            android:key="KEY_TIME"
+            android:layout="@layout/preference_item"
+            android:numeric="integer"
+            android:summary="5秒(请输入数字)"
+            android:title="轮询间隔" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="关于">
+        <Preference
+            android:layout="@layout/preference_item"
+            android:summary="不存在的"
+            android:title="官网">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="http://qgtaxi.bmob.site/" />
+        </Preference>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
