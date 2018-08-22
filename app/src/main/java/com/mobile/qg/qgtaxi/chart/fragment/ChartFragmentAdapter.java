@@ -1,4 +1,4 @@
-package com.mobile.qg.qgtaxi.chart;
+package com.mobile.qg.qgtaxi.chart.fragment;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -6,16 +6,14 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 
 import java.util.List;
 
-
 /**
  * Created by 93922 on 2018/8/17.
  * 描述：
  */
-
-public class MyFragmentAdapter extends FragmentStatePagerAdapter {
+public class ChartFragmentAdapter extends FragmentStatePagerAdapter {
     private List<Fragment> mFragments ;
     private List<String>   mTitles ;
-    public MyFragmentAdapter(FragmentManager fm, List<Fragment> fragments, List<String> titles) {
+    public ChartFragmentAdapter(FragmentManager fm, List<Fragment> fragments, List<String> titles) {
         super(fm);
         mFragments = fragments;
         mTitles = titles;

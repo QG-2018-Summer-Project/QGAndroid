@@ -3,7 +3,6 @@ package com.mobile.qg.qgtaxi.time;
 import android.content.Context;
 import android.widget.Scroller;
 
-
 /**
  * Created by 11234 on 2018/8/14.
  * 自定义Scroller类

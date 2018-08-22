@@ -1,6 +1,5 @@
 package com.mobile.qg.qgtaxi.detail;
 
-import android.content.DialogInterface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -30,17 +29,9 @@ public class DetailFragment extends DialogFragment {
         void onChart();
 
         void onRoute();
-
-        void onPrevious();
-
-        void onPredictCount();
-
-        void onPredictDemand();
-
     }
 
     private OnBottomItemClickListener mItemClickListener;
-
     private Poi mPoi;
 
     public DetailFragment poi(Poi poi) {
@@ -66,28 +57,22 @@ public class DetailFragment extends DialogFragment {
         window.setBackgroundDrawable(new ColorDrawable(color));
     }
 
-    private View mView;
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
-        mView = inflater.inflate(R.layout.widget_bottom_dialog, container, false);
-        startUpAnimation(mView);
+        View view = inflater.inflate(R.layout.widget_bottom_dialog, container, false);
+        startUpAnimation(view);
 
-        if (mPoi == null || mItemClickListener == null) {
-            new Exception("poi或监听器为空").printStackTrace();
-        }
-
-        ((TextView) mView.findViewById(R.id.tv_name)).setText(mPoi.getName());
-        mView.findViewById(R.id.cd_best).setOnClickListener(new View.OnClickListener() {
+        ((TextView) view.findViewById(R.id.tv_name)).setText(mPoi.getName());
+        view.findViewById(R.id.cd_best).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mItemClickListener.onRoute();
             }
         });
 
-        mView.findViewById(R.id.cd_data).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.cd_data).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mItemClickListener != null) {
@@ -96,42 +81,14 @@ public class DetailFragment extends DialogFragment {
             }
         });
 
-        mView.findViewById(R.id.btn_bottom_predict_count).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mItemClickListener != null) {
-                    mItemClickListener.onPredictCount();
-                }
-            }
-        });
-
-        mView.findViewById(R.id.btn_bottom_predict_demand).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mItemClickListener != null) {
-                    mItemClickListener.onPredictDemand();
-                }
-            }
-        });
-
-        mView.findViewById(R.id.btn_bottom_previous).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mItemClickListener != null) {
-                    mItemClickListener.onPrevious();
-                }
-            }
-        });
-
-        return mView;
+        return view;
     }
 
-    @Override
-    public void onCancel(DialogInterface dialog) {
-        startDownAnimation(mView);
-        super.onCancel(dialog);
-    }
-
+    /**
+     * 升起动画
+     *
+     * @param view view
+     */
     private void startUpAnimation(View view) {
         Animation slide = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0.0f,
                 Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF,
@@ -143,6 +100,11 @@ public class DetailFragment extends DialogFragment {
         view.startAnimation(slide);
     }
 
+    /**
+     * 降下动画
+     *
+     * @param view view
+     */
     private void startDownAnimation(View view) {
         Animation slide = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0.0f,
                 Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF,

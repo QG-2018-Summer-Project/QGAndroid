@@ -21,6 +21,13 @@ public class DaterGroup {
         return this;
     }
 
+    public DaterGroup getDemo() {
+        Calendar calendar = (Calendar) Calendar.getInstance().clone();
+        calendar.set(2017, 1, 1);
+        setAll(calendar);
+        return this;
+    }
+
     public void setAll(Calendar c) {
         Calendar calendar = (Calendar) c.clone();
         date = c.get(Calendar.DAY_OF_MONTH);

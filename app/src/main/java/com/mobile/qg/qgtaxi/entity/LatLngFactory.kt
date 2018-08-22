@@ -2,10 +2,8 @@ package com.mobile.qg.qgtaxi.entity
 
 import com.amap.api.maps.model.LatLng
 import com.mobile.qg.qgtaxi.util.TimeUtil
-
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 /**
  * Created by 11234 on 2018/8/12.
@@ -14,6 +12,12 @@ import java.util.Locale
 object LatLngFactory {
 
     private val FORMATTER = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
+    private val HOUR_FORMATTER = SimpleDateFormat("HH", Locale.CHINA)
+
+    fun getHour(): String {
+        return HOUR_FORMATTER.format(Date())
+    }
+
 
     fun getCurrent(farLeft: LatLng, nearRight: LatLng): CurrentLatLng {
         return CurrentLatLng(farLeft.longitude,

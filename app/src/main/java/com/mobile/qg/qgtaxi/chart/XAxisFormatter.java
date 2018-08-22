@@ -10,15 +10,12 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 public class XAxisFormatter implements IAxisValueFormatter {
 
-    private String hour;
-    private int    numHour;
-
     @Override
     public String getFormattedValue(float value, AxisBase axis) {
         /*因为最早的数据是三小时前的*/
         /*考虑到前一天的时间不应该是负数，这里判断是否+24*/
-        numHour =(numHour =(int)value-3)<0? numHour +24: numHour;
-        hour= numHour +"时";
-        return hour;
+        int numHour = (numHour = (int) value - 3) < 0 ? numHour + 24 : numHour;
+        return numHour + "时";
     }
+
 }

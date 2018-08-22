@@ -25,7 +25,7 @@
             android:value="dfcb9c7d151ef50b14c86ea30b8e8a0f" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".heatmap.HeatMapActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:windowSoftInputMode="stateHidden|adjustPan">
             <intent-filter>
@@ -34,6 +34,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".search.InputTipsActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
@@ -48,6 +49,14 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".wxapi.WXEntryActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <activity
+            android:name=".situation.SituationActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <activity
+            android:name=".situation.SituationDetailActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
     </application>

@@ -1,10 +1,9 @@
 package com.mobile.qg.qgtaxi.route;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -17,9 +16,8 @@ import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.Poi;
 import com.amap.api.services.core.LatLonPoint;
-import com.amap.api.services.help.Tip;
 import com.mobile.qg.qgtaxi.R;
-import com.mobile.qg.qgtaxi.route.entity.FromToGroup;
+import com.mobile.qg.qgtaxi.route.entity.FromTo;
 import com.mobile.qg.qgtaxi.search.InputTipsActivity;
 import com.mobile.qg.qgtaxi.search.SearchEvent;
 import com.mobile.qg.qgtaxi.util.AMapUtil;
@@ -32,9 +30,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.mobile.qg.qgtaxi.KeyValueConstant.KEY_ROUTE;
-import static com.mobile.qg.qgtaxi.KeyValueConstant.VALUE_ROUTE_END;
-import static com.mobile.qg.qgtaxi.KeyValueConstant.VALUE_ROUTE_START;
+import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.KEY_ROUTE;
+import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.VALUE_ROUTE_END;
+import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.VALUE_ROUTE_START;
 
 public class RouteActivity extends AppCompatActivity {
 
@@ -69,16 +67,16 @@ public class RouteActivity extends AppCompatActivity {
     private static final LatLonPoint GUANGZHOU = new LatLonPoint(23.035219, 113.398205);
 
     private BestRoute mBestRoute;
-    private FromToGroup mFromToGroup;
+    private FromTo mFromTo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route);
         ButterKnife.bind(this);
-
-        mFromToGroup = new FromToGroup().start(GUANGZHOU, "我的位置");
         EventBus.getDefault().register(this);
+
+        mFromTo = new FromTo().start(GUANGZHOU, "我的位置");
 
         mMapView.onCreate(savedInstanceState);
         aMap = mMapView.getMap();
@@ -99,12 +97,12 @@ public class RouteActivity extends AppCompatActivity {
     }
 
     private void refreshTextView() {
-        String start = mFromToGroup.getStartName();
+        String start = mFromTo.getStartName();
         if (start != null && !start.equals("")) {
             mStartTv.setText(start);
         }
 
-        String end = mFromToGroup.getEndName();
+        String end = mFromTo.getEndName();
         if (end != null && !end.equals("")) {
             mEndTv.setText(end);
         }
@@ -112,7 +110,7 @@ public class RouteActivity extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onPoi(Poi poi) {
-        mFromToGroup.end(AMapUtil.convertToLatLonPoint(poi.getCoordinate()), poi.getName());
+        mFromTo.end(AMapUtil.convertToLatLonPoint(poi.getCoordinate()), poi.getName());
         refreshTextView();
         EventBus.getDefault().removeStickyEvent(poi);
     }
@@ -121,9 +119,9 @@ public class RouteActivity extends AppCompatActivity {
     public void onSearch(SearchEvent event) {
 
         if (event.getPurpose() == SearchEvent.Purpose.START) {
-            mFromToGroup.start(event.getPoint(), event.getName());
+            mFromTo.start(event.getPoint(), event.getName());
         } else if (event.getPurpose() == SearchEvent.Purpose.END) {
-            mFromToGroup.end(event.getPoint(), event.getName());
+            mFromTo.end(event.getPoint(), event.getName());
         }
         refreshTextView();
 
@@ -146,7 +144,7 @@ public class RouteActivity extends AppCompatActivity {
 
     @OnClick({R.id.iv_route_reverse})
     public void reverse() {
-        if (mFromToGroup.reverse()) {
+        if (mFromTo.reverse()) {
             refreshTextView();
         }
 
@@ -155,19 +153,19 @@ public class RouteActivity extends AppCompatActivity {
     @OnClick(R.id.btn_route_end)
     public void cancelRoute() {
         mBestRoute.cancel();
-        aMap.animateCamera(CameraUpdateFactory.newLatLng(AMapUtil.convertToLatLng(mFromToGroup.getStartPoint())));
+        aMap.animateCamera(CameraUpdateFactory.newLatLng(AMapUtil.convertToLatLng(mFromTo.getStartPoint())));
 
     }
 
     @OnClick(R.id.btn_route_start)
     public void startRoute() {
-        if (mFromToGroup.available()) {
-            mBestRoute.search(mFromToGroup);
+        if (mFromTo.available()) {
+            mBestRoute.search(mFromTo);
             Toast.makeText(this, "开始路径规划", Toast.LENGTH_SHORT).show();
         } else {
-            if (mFromToGroup.getStartPoint() == null) {
+            if (mFromTo.getStartPoint() == null) {
                 Toast.makeText(this, "请输入起点", Toast.LENGTH_SHORT).show();
-            } else if (mFromToGroup.getEndPoint() == null) {
+            } else if (mFromTo.getEndPoint() == null) {
                 Toast.makeText(this, "请输入终点", Toast.LENGTH_SHORT).show();
             }
         }

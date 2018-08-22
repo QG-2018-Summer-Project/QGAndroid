@@ -12,7 +12,7 @@ import android.view.View;
 /**
  * Created by 11234 on 2018/8/14.
  */
-public class WeekView extends View {
+public final class WeekView extends View {
 
     private final static String[] WEEK_CN = {"日", "一", "二", "三", "四", "五", "六"};
     private final static String[] WEEK_EN = {"S", "M", "T", "W", "T", "F", "S"};

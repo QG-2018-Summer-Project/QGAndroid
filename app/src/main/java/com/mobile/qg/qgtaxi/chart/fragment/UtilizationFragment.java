@@ -1,10 +1,10 @@
-package com.mobile.qg.qgtaxi.chart;
+package com.mobile.qg.qgtaxi.chart.fragment;
 
-import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,15 +16,24 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.mobile.qg.qgtaxi.R;
+import com.mobile.qg.qgtaxi.chart.ChartActivity;
+import com.mobile.qg.qgtaxi.chart.Utilization;
+import com.mobile.qg.qgtaxi.chart.XAxisFormatter;
 import com.mobile.qg.qgtaxi.share.ShareUtil;
 import com.mobile.qg.qgtaxi.share.WeChatConstant;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -35,57 +44,65 @@ import butterknife.Unbinder;
  * Created by 93922 on 2018/8/17.
  * 描述：柱状图，出租车利用率
  */
-
-@SuppressLint("ValidFragment")
-public class BarChartFragment extends Fragment {
+public class UtilizationFragment extends BaseChartFragment {
 
     private static final String TAG = "BarChartFragment";
-    private ArrayList<BarEntry> data;/*点数据*/
-    private ArrayList<Float>    yData;/*y轴数据*/
-    private String              mLocation;/*位置*/
-    private String              mTime;/*时间，单位为小时*/
-    private Unbinder            unbinder;
-
+    private Unbinder unbinder;
     private IWXAPI api;
+
+    @BindView(R.id.srl_bc)
+    SwipeRefreshLayout swipeRefresh;
 
     @BindView(R.id.bc)
     BarChart mBarChart;
 
     @OnClick(R.id.btn_share_utilizepercent)
     public void share() {
-        ShareUtil.shareByView(mView,api);
+        ShareUtil.shareByView(mBarChart, api);
     }
-
-    View mView;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mView = inflater.inflate(R.layout.fragment_barchart, container, false);
-        unbinder = ButterKnife.bind(this, mView);
+        View view = inflater.inflate(R.layout.fragment_barchart, container, false);
+        unbinder = ButterKnife.bind(this, view);
         api = WXAPIFactory.createWXAPI(getActivity(), WeChatConstant.APP_ID, true);
+
+        swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        swipeRefresh.setOnRefreshListener(this);
+
         initChart();
-        createEntryData(yData, mTime);
-        setData(data);
-        return mView;
+
+        EventBus.getDefault().register(this);
+        return view;
     }
 
-
-    @SuppressLint("ValidFragment")
-    public BarChartFragment(ArrayList<Float> yData,String time) {
-        this.yData = yData;
-        mTime=time;
+    @Override
+    protected void readyRequest() {
+        swipeRefresh.setRefreshing(true);
+        ((ChartActivity) getActivity()).requestUtilizationData();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onUtilization(Utilization utilization) {
+        swipeRefresh.setRefreshing(false);
+        List<Float> floats = utilization.getPercents();
+        if (floats.size()==0){
+            return;
+        }
+        final ArrayList<Float> yData = (ArrayList<Float>) floats;
+        Log.e(TAG, "onResponse: " + yData);
+
+        setBarData(createBarEntryData(yData));
+    }
 
     private void initChart() {
-
         mBarChart.setDrawBarShadow(false);
         mBarChart.setDrawValueAboveBar(true);
         //不要缩放
         mBarChart.setDragEnabled(false);
         mBarChart.setScaleEnabled(false);
-
+        mBarChart.setBackgroundColor(Color.WHITE);
         mBarChart.getDescription().setEnabled(true);
         mBarChart.getDescription().setText("%");
         mBarChart.getDescription().setTextSize(12.0f);
@@ -130,17 +147,17 @@ public class BarChartFragment extends Fragment {
         legend.setXEntrySpace(4f);
     }
 
-
-    private void createEntryData(ArrayList<Float> yData, String time) {
-        int numTime = Integer.valueOf(time);
-        data = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            data.add(new BarEntry(numTime + i, yData.get(i)));
-        }
+    @Override
+    protected void setData(ArrayList<Entry> data) {
     }
 
+    @Override
+    protected void endRefresh() {
+        swipeRefresh.setRefreshing(false);
+    }
 
-    private void setData(ArrayList<BarEntry> data) {
+    private void setBarData(ArrayList<BarEntry> data) {
+
         BarDataSet set;
         if (mBarChart.getData() != null &&
                 mBarChart.getData().getDataSetCount() > 0) {
@@ -162,10 +179,16 @@ public class BarChartFragment extends Fragment {
         }
     }
 
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
+        EventBus.getDefault().unregister(this);
     }
+
+    @Override
+    public void onRefresh() {
+        ((ChartActivity) getActivity()).requestUtilizationData();
+    }
+
 }

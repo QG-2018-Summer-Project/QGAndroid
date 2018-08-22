@@ -12,13 +12,14 @@ import java.text.DecimalFormat;
 
 public class YAxisFormatter implements IAxisValueFormatter {
 
-    private DecimalFormat format ;
+    private DecimalFormat format;
 
-    public YAxisFormatter(){
+    public YAxisFormatter() {
         format = new DecimalFormat("0");
     }
+
     @Override
     public String getFormattedValue(float value, AxisBase axis) {
-        return format.format(value)+"%";
+        return format.format(value) + "%";
     }
 }

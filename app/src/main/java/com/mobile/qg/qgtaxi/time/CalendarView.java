@@ -10,7 +10,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-
 import java.util.ArrayList;
 
 /**
@@ -47,23 +46,13 @@ public class CalendarView extends View implements CalendarScroller.OnScrollListe
         init();
     }
 
-    public CalendarView(Context context) {
-        super(context);
-        init();
-    }
-
-    public CalendarView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init();
-    }
-
     private Paint mPaint;
     private CalendarScroller mXScroller;
     private float mStartX;
     private float mStartY;
     private float mTextHeight;
-    private DaterGroup mDaterGroup = null;
-    private Dater mMarker = Dater.getInstance();
+    private DaterGroup mDaterGroup = new DaterGroup().getDemo();
+    private Dater mMarker = Dater.getDemo();
 
     private final static int BLACK = Color.parseColor("#CC3C3C3C");
     private final static int GRAY = Color.parseColor("#CC999999");
@@ -76,8 +65,6 @@ public class CalendarView extends View implements CalendarScroller.OnScrollListe
         mPaint.setAntiAlias(true);
         mPaint.setTextSize(40);
         mPaint.setTypeface(Typeface.DEFAULT);
-
-        mDaterGroup = new DaterGroup().getInstance();
 
         mXScroller = new CalendarScroller(getContext());
         mXScroller.setOnScrollListener(this);

@@ -1,14 +1,15 @@
-package com.mobile.qg.qgtaxi;
+package com.mobile.qg.qgtaxi.heatmap;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.preference.PreferenceManager;
+import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.amap.api.maps.AMap;
@@ -23,35 +24,36 @@ import com.amap.api.maps.model.Poi;
 import com.amap.api.maps.model.VisibleRegion;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.help.Tip;
+import com.mobile.qg.qgtaxi.R;
 import com.mobile.qg.qgtaxi.chart.ChartActivity;
-import com.mobile.qg.qgtaxi.chart.ChartApi;
 import com.mobile.qg.qgtaxi.detail.DetailFragment;
 import com.mobile.qg.qgtaxi.entity.CurrentLatLng;
-import com.mobile.qg.qgtaxi.heatmap.HeatMap;
-import com.mobile.qg.qgtaxi.heatmap.HeatMapApi;
-import com.mobile.qg.qgtaxi.heatmap.PollingEvent;
+import com.mobile.qg.qgtaxi.entity.LatLngFactory;
 import com.mobile.qg.qgtaxi.route.RouteActivity;
 import com.mobile.qg.qgtaxi.search.InputTipsActivity;
-import com.mobile.qg.qgtaxi.setting.*;
+import com.mobile.qg.qgtaxi.setting.SettingActivity;
+import com.mobile.qg.qgtaxi.share.ShareUtil;
+import com.mobile.qg.qgtaxi.share.WeChatConstant;
 import com.mobile.qg.qgtaxi.time.CalendarFragment;
 import com.mobile.qg.qgtaxi.time.TimePicker;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public final class MainActivity extends AppCompatActivity implements
+import static com.mobile.qg.qgtaxi.constant.IntentConstant.KEY_CHART;
+
+public final class HeatMapActivity extends AppCompatActivity implements
         AMap.OnMapClickListener,
         AMap.OnPOIClickListener {
 
-    private static final String TAG = "MainActivity";
-
-    public static final int CAMERA_ZOOM_LARGE = 15;
-    public static final int CAMERA_ZOOM_NORMAL = 11;
+    public static final int CAMERA_ZOOM_LARGE = 16;
+    public static final int CAMERA_ZOOM_NORMAL = 12;
     private static final LatLng GUANGZHOU = new LatLng(23.035219, 113.398205);
     //绿色标记
     private static final BitmapDescriptor GREEN_MARKER = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
@@ -59,8 +61,13 @@ public final class MainActivity extends AppCompatActivity implements
     @BindView(R.id.map)
     protected MapView mMapView;
 
+    @BindView(R.id.pb_heatmap)
+    protected ProgressBar mProgressBar;
+
     private AMap mAMap;
     private HeatMap mHeatMap;
+
+    private IWXAPI mWxApi = WXAPIFactory.createWXAPI(this, WeChatConstant.APP_ID, true);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,14 +87,13 @@ public final class MainActivity extends AppCompatActivity implements
 
         requestPermission();
 
-        setApi(new SettingEvent(PreferenceManager.getDefaultSharedPreferences(this)));
-
         mHeatMap = HeatMap.builder()
                 .aMap(mAMap)
-                .isHeatMapping(true)
-                .isStop(false)
-                .period(new PollingEvent(PreferenceManager.getDefaultSharedPreferences(this)).getPeriod())
+                .context(this)
+                .progressBar(mProgressBar)
                 .build();
+
+        mWxApi.registerApp(WeChatConstant.APP_ID);
 
     }
 
@@ -121,23 +127,12 @@ public final class MainActivity extends AppCompatActivity implements
     @OnClick(R.id.iv_change)
     public void changeHeatMapMode() {
 
-        if (mHeatMap == null) {
-            mHeatMap = HeatMap.builder()
-                    .aMap(mAMap)
-                    .isHeatMapping(true)
-                    .isStop(false)
-                    .period(new PollingEvent(PreferenceManager.getDefaultSharedPreferences(this)).getPeriod())
-                    .build()
-                    .showLive();
-            Toast.makeText(MainActivity.this, "开始绘制热力图", Toast.LENGTH_SHORT).show();
+        if (mHeatMap.isShowing()) {
+            mHeatMap.cancel();
+            Toast.makeText(HeatMapActivity.this, "暂停热力图", Toast.LENGTH_SHORT).show();
         } else {
-            if (mHeatMap.isShowing()) {
-                mHeatMap.cancel();
-                Toast.makeText(MainActivity.this, "暂停热力图", Toast.LENGTH_SHORT).show();
-            } else {
-                mHeatMap.showLive();
-                Toast.makeText(MainActivity.this, "开始绘制热力图", Toast.LENGTH_SHORT).show();
-            }
+            mHeatMap.showLive();
+            Toast.makeText(HeatMapActivity.this, "开始绘制热力图", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -151,35 +146,55 @@ public final class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * 设置后返回事件（ip/连接超时）
-     *
-     * @param event ip/超时事件
+     * 预测车流量
      */
-    @Subscribe()
-    public void setApi(SettingEvent event) {
-        Log.e(TAG, "setApi: " + event.getIp());
-        HeatMapApi.getInstance()
-                .edit()
-                .connectTimeOut(event.getTimeOut())
-                .ip(event.getIp())
-                .accept();
-        ChartApi.getInstance()
-                .edit()
-                .connectTimeOut(event.getTimeOut())
-                .ip(event.getIp())
-                .accept();
-
+    @OnClick(R.id.iv_count)
+    public void predictCount() {
+        mHeatMap.predictCount();
     }
 
     /**
-     * 设置后返回事件（热力图轮询间隔）
-     *
-     * @param event 轮询事件
+     * 预测需求量
      */
-    @Subscribe()
-    public void setHeatMapPeriod(PollingEvent event) {
-        Log.e(TAG, "setHeatMapPeriod: " + event.getPeriod());
-        mHeatMap.setPeriod(event.getPeriod());
+    @OnClick(R.id.iv_demand)
+    public void predictDemand() {
+        mHeatMap.predictDemand();
+    }
+
+    /**
+     * 查看过去的热力图
+     */
+    @OnClick(R.id.iv_period)
+    public void showPeriod() {
+        new CalendarFragment().listener(new TimePicker.OnTimePackListener() {
+            @Override
+            public void onCancel() {
+                ((CalendarFragment) HeatMapActivity.this.getSupportFragmentManager().findFragmentByTag("TAG")).dismiss();
+            }
+
+            @Override
+            public void onCommit(String time) {
+                mHeatMap.showPeriod(time);
+                ((CalendarFragment) HeatMapActivity.this.getSupportFragmentManager().findFragmentByTag("TAG")).dismiss();
+            }
+        }).show(HeatMapActivity.this.getSupportFragmentManager(), "TAG");
+    }
+
+    /**
+     * 热力图截屏
+     */
+    @OnClick(R.id.iv_shot)
+    public void shot() {
+        mAMap.getMapScreenShot(new AMap.OnMapScreenShotListener() {
+            @Override
+            public void onMapScreenShot(Bitmap bitmap) {
+                ShareUtil.shareByBitmap(bitmap, mWxApi);
+            }
+
+            @Override
+            public void onMapScreenShot(Bitmap bitmap, int i) {
+            }
+        });
     }
 
     /**
@@ -237,16 +252,12 @@ public final class MainActivity extends AppCompatActivity implements
                     @Override
                     public void onChart() {
                         //调出图表
-
                         VisibleRegion region = mAMap.getProjection().getVisibleRegion();
-                        CurrentLatLng latLng = new CurrentLatLng(
-                                region.farLeft.latitude, region.farLeft.longitude,
-                                region.nearRight.latitude, region.nearRight.longitude, "2017-02-07 16:00:00");
+                        CurrentLatLng latLng = LatLngFactory.INSTANCE.getCurrent(region.farLeft, region.nearRight);
 
-                        Intent intent = new Intent(MainActivity.this, ChartActivity.class);
-                        intent.putExtra(KeyValueConstant.KEY_CHART_ACTIVITY, latLng);
+                        Intent intent = new Intent(HeatMapActivity.this, ChartActivity.class);
+                        intent.putExtra(KEY_CHART, latLng);
                         startActivity(intent);
-
 
                     }
 
@@ -254,35 +265,7 @@ public final class MainActivity extends AppCompatActivity implements
                     public void onRoute() {
                         //最佳路径
                         EventBus.getDefault().postSticky(poi);
-                        startActivity(new Intent(MainActivity.this, RouteActivity.class));
-                    }
-
-                    @Override
-                    public void onPrevious() {
-                        new CalendarFragment().listener(new TimePicker.OnTimePackListener() {
-                            @Override
-                            public void onCancel() {
-                                ((CalendarFragment) MainActivity.this.getSupportFragmentManager().findFragmentByTag("TAG")).dismiss();
-                            }
-
-                            @Override
-                            public void onCommit(String s) {
-                                mHeatMap.showPeriod(s);
-                                ((CalendarFragment) MainActivity.this.getSupportFragmentManager().findFragmentByTag("TAG")).dismiss();
-                            }
-                        }).show(MainActivity.this.getSupportFragmentManager(), "TAG");
-                    }
-
-                    @Override
-                    public void onPredictCount() {
-                        mHeatMap.predictCount();
-                        ((DetailFragment) getSupportFragmentManager().findFragmentByTag("POI")).dismiss();
-                    }
-
-                    @Override
-                    public void onPredictDemand() {
-                        mHeatMap.predictDemand();
-                        ((DetailFragment) getSupportFragmentManager().findFragmentByTag("POI")).dismiss();
+                        startActivity(new Intent(HeatMapActivity.this, RouteActivity.class));
                     }
                 })
                 .show(getSupportFragmentManager(), "POI");
@@ -302,38 +285,34 @@ public final class MainActivity extends AppCompatActivity implements
         EventBus.getDefault().unregister(this);
     }
 
-
-    private boolean requireShow = false;
-
     @Override
     protected void onResume() {
         super.onResume();
-        if (mHeatMap != null && requireShow) {
-            requireShow = false;
-            mHeatMap.showLive();
-            Toast.makeText(MainActivity.this, "开始绘制热力图", Toast.LENGTH_SHORT).show();
-        }
         mMapView.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mHeatMap != null && mHeatMap.isShowing()) {
-            requireShow = true;
-            mHeatMap.cancel();
-            Toast.makeText(MainActivity.this, "暂停热力图", Toast.LENGTH_SHORT).show();
-        }
+        mHeatMap.cancel();
         mMapView.onPause();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mProgressBar.getVisibility() == View.VISIBLE) {
+            mProgressBar.setVisibility(View.GONE);
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     /**
      * 申请读写权限，（以保存Crash信息）
      */
     private void requestPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE}, 1);
         }
     }
 

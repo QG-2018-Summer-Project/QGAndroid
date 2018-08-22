@@ -1,10 +1,10 @@
-package com.mobile.qg.qgtaxi.chart;
+package com.mobile.qg.qgtaxi.chart.fragment;
 
-import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,13 +19,22 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.mobile.qg.qgtaxi.R;
+import com.mobile.qg.qgtaxi.chart.ChartActivity;
+import com.mobile.qg.qgtaxi.chart.Crowd;
+import com.mobile.qg.qgtaxi.chart.XAxisFormatter;
+import com.mobile.qg.qgtaxi.chart.YAxisFormatter;
 import com.mobile.qg.qgtaxi.share.ShareUtil;
 import com.mobile.qg.qgtaxi.share.WeChatConstant;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,55 +45,61 @@ import butterknife.Unbinder;
  * Created by 93922 on 2018/8/16.
  * 描述：线图，展示地区流量变化率
  */
-
-
-@SuppressLint("ValidFragment")
-public class LineChartFragment extends Fragment {
+public class CrowdFragment extends BaseChartFragment {
 
     private static final String TAG = "ChartFragment";
-    private ArrayList<Entry> data;/*点数据*/
-    private ArrayList<Float> yData;/*y轴数据*/
-    private String           mLocation;/*位置，本来想加在图表下方的标签的，但是后来考虑到四个坐标点写出来太长，就暂时就取消了*/
-    private String           mTime;/*时间，单位为时，也取消了*/
-    private IWXAPI           api;
 
+    private IWXAPI api;
     private Unbinder unbinder;
+
+    @BindView(R.id.srl_lc)
+    SwipeRefreshLayout swipeRefresh;
+
     @BindView(R.id.lc)
     LineChart mLineChart;
 
     @OnClick(R.id.btn_share_changepercent)
     public void share() {
-        ShareUtil.shareByView(mLineChart,api);
+        ShareUtil.shareByView(mLineChart, api);
     }
-
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_linechart, container, false);
         unbinder = ButterKnife.bind(this, view);
-        api= WXAPIFactory.createWXAPI(getActivity(), WeChatConstant.APP_ID,true);
-        initChart();
-        createEntryData(yData, mTime);
-        setData(data);
+        api = WXAPIFactory.createWXAPI(getActivity(), WeChatConstant.APP_ID, true);
+
+        swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        swipeRefresh.setOnRefreshListener(this);
+
+        EventBus.getDefault().register(this);
         return view;
     }
 
-    @SuppressLint("ValidFragment")
-    public LineChartFragment(ArrayList<Float> yData,String time) {
-        this.yData = yData;
-        mTime=time;
-        Log.e(TAG, "LineChartFragment: " + yData);
-
-    }
-
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        unbinder.unbind();
+    protected void readyRequest() {
+        swipeRefresh.setRefreshing(true);
+        ((ChartActivity) getActivity()).requestCrowdData();
     }
 
-    private void initChart() {
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void OnCrowd(Crowd crowd) {
+        swipeRefresh.setRefreshing(false);
+        List<Float> floats = crowd.getPercents();
+        if (floats.size() == 0) {
+            return;
+        }
+
+        final ArrayList<Float> yData = (ArrayList<Float>) floats;
+        Log.e(TAG, "onResponse: " + yData);
+
+        initChart(yData);
+        setData(createEntryData(yData));
+    }
+
+    private void initChart(ArrayList<Float> yData) {
+        Log.e(TAG, "initChart: ");
         // 取消右下角的默认描述,
         mLineChart.getDescription().setEnabled(false);
         // 不支持点击,支持的话点击之后是一个十字线锁定,后期有时间加上MarkView再回来支持点击
@@ -134,9 +149,8 @@ public class LineChartFragment extends Fragment {
         leftAxis.setValueFormatter(new YAxisFormatter());
         leftAxis.setTextColor(ColorTemplate.getHoloBlue());
         /*动态设置y轴范围*/
-        Float min, max;
-        leftAxis.setAxisMinimum((min = Collections.min(yData)) >= 10 ? min - 10 : 0);
-        leftAxis.setAxisMaximum((max = Collections.max(yData)) < 100 ? max + 10 : 100);
+        leftAxis.setAxisMinimum(0);
+        leftAxis.setAxisMaximum(Collections.max(yData) + 20);
         leftAxis.setDrawGridLines(false);
         leftAxis.setGranularityEnabled(false);
         //不要右边的Y轴
@@ -144,9 +158,9 @@ public class LineChartFragment extends Fragment {
 
     }
 
-
-    private void setData(ArrayList<Entry> data) {
-
+    @Override
+    protected void setData(ArrayList<Entry> data) {
+        Log.e(TAG, "setData: " + data);
         LineDataSet set;
 
         if (mLineChart.getData() != null && mLineChart.getData().getDataSetCount() > 0) {
@@ -155,7 +169,7 @@ public class LineChartFragment extends Fragment {
             mLineChart.getData().notifyDataChanged();
             mLineChart.notifyDataSetChanged();
         } else {
-            set = new LineDataSet(data, "出租车利用率");
+            set = new LineDataSet(data, "拥堵率");
             set.setAxisDependency(YAxis.AxisDependency.LEFT);
             set.isDrawValuesEnabled();
             set.setColor(ColorTemplate.getHoloBlue());
@@ -174,13 +188,20 @@ public class LineChartFragment extends Fragment {
         }
     }
 
-    private void createEntryData(ArrayList<Float> yData, String time) {
-        int numTime = 1;
-        data = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            data.add(new Entry(numTime + i, yData.get(i)));
-        }
+    @Override
+    protected void endRefresh() {
+        swipeRefresh.setRefreshing(false);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+        EventBus.getDefault().unregister(this);
+    }
 
+    @Override
+    public void onRefresh() {
+        ((ChartActivity) getActivity()).requestCrowdData();
+    }
 }

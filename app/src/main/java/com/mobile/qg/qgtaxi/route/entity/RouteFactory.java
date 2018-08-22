@@ -1,19 +1,12 @@
 package com.mobile.qg.qgtaxi.route.entity;
 
-import android.util.Log;
-
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.route.DrivePath;
 import com.amap.api.services.route.DriveRouteResult;
 import com.amap.api.services.route.DriveStep;
-import com.amap.api.services.route.Path;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import lombok.NonNull;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by 11234 on 2018/8/17.
@@ -56,14 +49,10 @@ public class RouteFactory {
                 steps.add(step);
             }
 
-            Log.e(TAG, "getRoutes: " + allTime);
-            Log.e(TAG, "getRoutes: " + allDistance);
-
             Route route = new Route(index++, steps, allTime, allDistance);
             routes.add(route);
 
         }
-
         return new Routes(routes);
     }
 

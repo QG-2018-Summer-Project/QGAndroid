@@ -2,7 +2,6 @@ package com.mobile.qg.qgtaxi.time;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by 11234 on 2018/8/13.
@@ -40,18 +39,15 @@ public class Dater {
         return day;
     }
 
-    public Calendar toCalendar() {
-        Date date = new Date(year, month, day);
-        Calendar calendar = (Calendar) Calendar.getInstance().clone();
-        calendar.setTime(date);
-        return calendar;
-    }
-
     public static Dater getInstance() {
-
         Calendar calendar = Calendar.getInstance();
         return new Dater(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH));
+    }
 
+    public static Dater getDemo() {
+        Calendar calendar = (Calendar) Calendar.getInstance().clone();
+        calendar.set(2017,1,1);
+        return new Dater(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH));
     }
 
     @Override

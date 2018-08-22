@@ -8,7 +8,7 @@ import lombok.Data;
  * Created by 11234 on 2018/8/17.
  */
 @Data
-public class FromToGroup {
+public class FromTo {
 
     private LatLonPoint startPoint;
     private LatLonPoint endPoint;
@@ -16,13 +16,13 @@ public class FromToGroup {
     private String startName;
     private String endName;
 
-    public FromToGroup start(LatLonPoint startPoint, String startName) {
+    public FromTo start(LatLonPoint startPoint, String startName) {
         this.startName = startName;
         this.startPoint = startPoint;
         return this;
     }
 
-    public FromToGroup end(LatLonPoint endPoint, String endName) {
+    public FromTo end(LatLonPoint endPoint, String endName) {
         this.endName = endName;
         this.endPoint = endPoint;
         return this;

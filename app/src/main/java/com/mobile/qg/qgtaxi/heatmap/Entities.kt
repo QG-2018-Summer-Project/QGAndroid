@@ -2,11 +2,20 @@ package com.mobile.qg.qgtaxi.heatmap
 
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.WeightedLatLng
-
-import java.util.ArrayList
+import com.google.gson.annotations.SerializedName
+import java.util.*
 
 /**
- * Created by 11234 on 2018/8/12.
+ * 热力图中点的标准返回类
+ */
+data class HeatMapLatLng(@SerializedName(value = "lon", alternate = ["lng"]) var lon: Double, var lat: Double, var weight: Int)
+
+/**
+ * 热力图的标准返回类
+ */
+data class HeatMapResponse(var status: Int, var pointSet: List<HeatMapLatLng>)
+
+/**
  * 权重经纬度的工厂类
  */
 object WeightedLatLngFactory {
@@ -24,6 +33,5 @@ object WeightedLatLngFactory {
         }
         return weightedList
     }
-
 
 }

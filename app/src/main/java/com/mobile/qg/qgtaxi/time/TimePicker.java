@@ -6,15 +6,17 @@ import android.support.v7.widget.LinearSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mobile.qg.qgtaxi.R;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by 11234 on 2018/8/13.
@@ -23,6 +25,8 @@ public class TimePicker extends RelativeLayout implements
         CalendarView.OnPickListener {
 
     private final static String[] MONTH_EN = {"Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    private final static String[] MONTH_CN = {"1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"};
+    private final static String[] AM_PM = {"AM", "PM"};
 
     public interface OnTimePackListener {
         void onCancel();
@@ -36,53 +40,66 @@ public class TimePicker extends RelativeLayout implements
         mTimePackListener = listener;
     }
 
-    private TextView mMonthTv;
-    private CalendarView mCalendarView;
-    private RecyclerView mHourRv;
-    private RecyclerView mMinuteRv;
+    @BindView(R.id.tv_picker_month)
+    protected TextView mMonthTv;
+
+    @BindView(R.id.cv_picker)
+    protected CalendarView mCalendarView;
+
+    @BindView(R.id.rv_picker_hour)
+    protected RecyclerView mHourRv;
+
+    @BindView(R.id.rv_picker_minute)
+    protected RecyclerView mMinuteRv;
+
+    @BindView(R.id.tv_picker_am)
+    protected TextView mAmPmTv;
+
+    @BindView(R.id.tv_picker_time)
+    protected TextView mTimeTv;
+
+    @OnClick(R.id.iv_picker_last)
+    protected void last() {
+        mCalendarView.lastMonth();
+    }
+
+    @OnClick(R.id.iv_picker_next)
+    protected void next() {
+        mCalendarView.nextMonth();
+    }
+
+    @OnClick(R.id.iv_picker_close)
+    protected void close() {
+        if (mTimePackListener != null) {
+            mTimePackListener.onCancel();
+        }
+    }
+
+    @OnClick(R.id.btn_confirm)
+    protected void confirm() {
+        if (mTimePackListener != null) {
+            mTimePackListener.onCommit(getTime());
+        }
+    }
+
+    @OnClick(R.id.tv_picker_am)
+    protected void transfer() {
+        mAmPmTv.setText(mAmPmTv.getText().toString().equals(AM_PM[0]) ? AM_PM[1] : AM_PM[0]);
+    }
 
     public TimePicker(Context context, AttributeSet attrs) {
         super(context, attrs);
         LayoutInflater.from(context).inflate(R.layout.layout_picker, this);
+        ButterKnife.bind(this);
+
         init();
     }
 
-    public TimePicker(Context context) {
-        super(context);
-        LayoutInflater.from(context).inflate(R.layout.layout_picker, this);
-        init();
-    }
+    private void init() {
 
-    public TimePicker(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        LayoutInflater.from(context).inflate(R.layout.layout_picker, this);
-        init();
-    }
-
-    private void init(){
-        mMonthTv = findViewById(R.id.tv_picker_month);
-        mCalendarView = findViewById(R.id.cv_picker);
-        mHourRv = findViewById(R.id.rv_picker_hour);
-        mMinuteRv = findViewById(R.id.rv_picker_minute);
-
-        mMonthTv.setText(MONTH_EN[Calendar.getInstance().get(Calendar.MONTH)]);
+        mMonthTv.setText(MONTH_CN[1]);
 
         mCalendarView.setOnPickListener(this);
-
-        findViewById(R.id.iv_picker_last).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCalendarView.lastMonth();
-            }
-        });
-
-        findViewById(R.id.iv_picker_next).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCalendarView.nextMonth();
-            }
-        });
-
 
         List<String> hours = new ArrayList<>();
         for (int i = 0; i < 13; i++) {
@@ -96,28 +113,16 @@ public class TimePicker extends RelativeLayout implements
         }
         setRecyclerView(mMinuteRv, minutes);
 
-        findViewById(R.id.iv_picker_close).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mTimePackListener != null) {
-                    mTimePackListener.onCancel();
-                }
-            }
-        });
+        mTimeTv.setText(mCalendarView.getMark());
 
-        findViewById(R.id.btn_confirm).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mTimePackListener != null) {
-                    mTimePackListener.onCommit(getTime());
-                }
-            }
-        });
     }
 
     private String getTime() {
         String a = mCalendarView.getMark();
         String hour = ((WheelAdapter) mHourRv.getAdapter()).getText(((LinearLayoutManager) mHourRv.getLayoutManager()).findFirstVisibleItemPosition());
+        if (mAmPmTv.getText().toString().equals(AM_PM[1])) {
+            hour = String.valueOf(Integer.parseInt(hour) + 12);
+        }
         String minute = ((WheelAdapter) mMinuteRv.getAdapter()).getText(((LinearLayoutManager) mMinuteRv.getLayoutManager()).findFirstVisibleItemPosition());
         String b = hour + ":" + minute + ":00";
         return a + " " + b;
@@ -127,13 +132,13 @@ public class TimePicker extends RelativeLayout implements
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         LinearSnapHelper helper = new LinearSnapHelper();
         helper.attachToRecyclerView(recyclerView);
-        WheelAdapter adapter = new WheelAdapter(strings);
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(new WheelAdapter(strings));
     }
 
     @Override
     public void onPick(Dater dater) {
-        mMonthTv.setText(MONTH_EN[dater.getMonth() - 1]);
+        mMonthTv.setText(MONTH_CN[dater.getMonth() - 1]);
+        mTimeTv.setText(mCalendarView.getMark());
     }
 
 }

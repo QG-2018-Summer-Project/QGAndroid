@@ -38,9 +38,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.mobile.qg.qgtaxi.KeyValueConstant.KEY_ROUTE;
-import static com.mobile.qg.qgtaxi.KeyValueConstant.VALUE_ROUTE_END;
-import static com.mobile.qg.qgtaxi.KeyValueConstant.VALUE_ROUTE_START;
+import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.KEY_ROUTE;
+import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.VALUE_ROUTE_END;
+import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.VALUE_ROUTE_START;
 
 /**
  * 输入提示功能实现
@@ -51,7 +51,7 @@ public class InputTipsActivity extends AppCompatActivity implements
         InputTipsAdapter.TipsCallback,
         HistoryAdapter.HistoriesCallback {
 
-    private final static String CITY = "广州";
+    private final static String CITY = "中国";
 
     @BindView(R.id.inputlist)
     protected RecyclerView mTipList;
