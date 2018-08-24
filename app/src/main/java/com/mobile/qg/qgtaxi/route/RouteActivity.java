@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -74,12 +75,11 @@ public class RouteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route);
         ButterKnife.bind(this);
-        EventBus.getDefault().register(this);
-
-        mFromTo = new FromTo().start(GUANGZHOU, "我的位置");
 
         mMapView.onCreate(savedInstanceState);
         aMap = mMapView.getMap();
+
+        mFromTo = new FromTo().start(GUANGZHOU, "我的位置");
 
         aMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(AMapUtil.convertToLatLng(GUANGZHOU), 17, 0, 0)));
         aMap.getUiSettings().setZoomControlsEnabled(false);
@@ -94,6 +94,7 @@ public class RouteActivity extends AppCompatActivity {
                 .willHide(mHeadCd, mStartBtn)
                 .willShow(mBottomRl);
 
+        EventBus.getDefault().register(this);
     }
 
     private void refreshTextView() {
@@ -108,8 +109,13 @@ public class RouteActivity extends AppCompatActivity {
         }
     }
 
+    private static final String TAG = "RouteActivity";
+
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onPoi(Poi poi) {
+        Log.e(TAG, "onPoi: " + poi.getCoordinate().latitude);
+        Log.e(TAG, "onPoi: " + poi.getCoordinate().longitude);
+        Log.e(TAG, "onPoi: " + poi.getName());
         mFromTo.end(AMapUtil.convertToLatLonPoint(poi.getCoordinate()), poi.getName());
         refreshTextView();
         EventBus.getDefault().removeStickyEvent(poi);

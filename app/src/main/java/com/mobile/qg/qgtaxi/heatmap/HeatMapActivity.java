@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -34,6 +35,7 @@ import com.mobile.qg.qgtaxi.search.InputTipsActivity;
 import com.mobile.qg.qgtaxi.setting.SettingActivity;
 import com.mobile.qg.qgtaxi.share.ShareUtil;
 import com.mobile.qg.qgtaxi.share.WeChatConstant;
+import com.mobile.qg.qgtaxi.situation.SituationActivity;
 import com.mobile.qg.qgtaxi.time.CalendarFragment;
 import com.mobile.qg.qgtaxi.time.TimePicker;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
@@ -47,6 +49,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.mobile.qg.qgtaxi.constant.IntentConstant.KEY_CHART;
+import static com.mobile.qg.qgtaxi.constant.IntentConstant.KEY_SITUATION;
 
 public final class HeatMapActivity extends AppCompatActivity implements
         AMap.OnMapClickListener,
@@ -132,7 +135,6 @@ public final class HeatMapActivity extends AppCompatActivity implements
             Toast.makeText(HeatMapActivity.this, "暂停热力图", Toast.LENGTH_SHORT).show();
         } else {
             mHeatMap.showLive();
-            Toast.makeText(HeatMapActivity.this, "开始绘制热力图", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -198,6 +200,19 @@ public final class HeatMapActivity extends AppCompatActivity implements
     }
 
     /**
+     * 异常情况
+     */
+    @OnClick(R.id.iv_situation)
+    public void situation() {
+        VisibleRegion region = mAMap.getProjection().getVisibleRegion();
+        CurrentLatLng latLng = LatLngFactory.INSTANCE.getCurrent(region.farLeft, region.nearRight);
+
+        Intent intent = new Intent(HeatMapActivity.this, SituationActivity.class);
+        intent.putExtra(KEY_SITUATION, latLng);
+        startActivity(intent);
+    }
+
+    /**
      * 搜索地点 + 移动Camera中心 + 地图缩进
      *
      * @param tip 输入提示
@@ -238,6 +253,8 @@ public final class HeatMapActivity extends AppCompatActivity implements
         moveCamera(latLng, true, 0);
     }
 
+    private static final String TAG = "HeatMapActivity";
+
     /**
      * 地图兴趣点点击事件 + 移动Camera中心 + 跳出底部Fragment
      *
@@ -245,6 +262,7 @@ public final class HeatMapActivity extends AppCompatActivity implements
      */
     @Override
     public void onPOIClick(final Poi poi) {
+        Log.e(TAG, "onPOIClick: ");
         moveCamera(poi.getCoordinate(), true, 0);
         new DetailFragment()
                 .poi(poi)

@@ -48,6 +48,7 @@ import butterknife.Unbinder;
 public class CrowdFragment extends BaseChartFragment {
 
     private static final String TAG = "ChartFragment";
+    private  ArrayList<Float> yData;
 
     private IWXAPI api;
     private Unbinder unbinder;
@@ -72,6 +73,11 @@ public class CrowdFragment extends BaseChartFragment {
 
         swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
         swipeRefresh.setOnRefreshListener(this);
+        if (yData!=null){
+            initChart(yData);
+            createEntryData(yData);
+            setData(createEntryData(yData));
+        }
 
         EventBus.getDefault().register(this);
         return view;
@@ -91,7 +97,7 @@ public class CrowdFragment extends BaseChartFragment {
             return;
         }
 
-        final ArrayList<Float> yData = (ArrayList<Float>) floats;
+        yData = (ArrayList<Float>) floats;
         Log.e(TAG, "onResponse: " + yData);
 
         initChart(yData);

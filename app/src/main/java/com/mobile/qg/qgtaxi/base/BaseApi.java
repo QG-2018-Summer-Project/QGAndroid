@@ -20,9 +20,11 @@ import okhttp3.Response;
 
 import static android.content.ContentValues.TAG;
 import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.DEFAULT_PERIOD;
+import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.DEFAULT_PORT;
 import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.DEFAULT_TIMEOUT;
 import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.DEFAULT_URL;
 import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.KEY_PERIOD;
+import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.KEY_PORT;
 import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.KEY_TIMEOUT;
 import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.KEY_URL;
 
@@ -34,9 +36,10 @@ public class BaseApi {
     static int sConnectTimeOut = 100;
     static int sPeriod = 5;
     static String sIP = "localhost";
+    static String sPort = "8080";
 
     protected static String getRootUrl() {
-        return "http://" + sIP + ":8080/qgtaxi/";
+        return "http://" + sIP + ":" + sPort + "/qgtaxi/";
     }
 
     public static int getPeriod() {
@@ -115,12 +118,14 @@ public class BaseApi {
     public final static class ApiEditor {
 
         private String ip;
+        private String port;
         private int timeOut;
         private int period;
 
         public ApiEditor initDefault(Context context) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
             ip = sharedPreferences.getString(KEY_URL, DEFAULT_URL);
+            port = sharedPreferences.getString(KEY_PORT, DEFAULT_PORT);
             timeOut = Integer.parseInt(sharedPreferences.getString(KEY_TIMEOUT, DEFAULT_TIMEOUT));
             period = Integer.parseInt(sharedPreferences.getString(KEY_PERIOD, DEFAULT_PERIOD));
             return API_EDITOR;
@@ -136,6 +141,11 @@ public class BaseApi {
             return API_EDITOR;
         }
 
+        public ApiEditor port(String port) {
+            this.port = port;
+            return API_EDITOR;
+        }
+
         public ApiEditor period(int period) {
             this.period = period;
             return API_EDITOR;
@@ -145,6 +155,7 @@ public class BaseApi {
             sConnectTimeOut = timeOut;
             sPeriod = period;
             sIP = ip;
+            sPort = port;
         }
 
     }

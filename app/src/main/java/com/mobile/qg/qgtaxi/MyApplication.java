@@ -1,6 +1,7 @@
 package com.mobile.qg.qgtaxi;
 
 import android.app.Application;
+import android.widget.Toast;
 
 import com.mobile.qg.qgtaxi.base.BaseApi;
 
@@ -16,6 +17,7 @@ public class MyApplication extends Application {
         super.onCreate();
         CrashHandler.getInstance().init(this);
         BaseApi.edit().initDefault(this).accept();
+
     }
 
 }

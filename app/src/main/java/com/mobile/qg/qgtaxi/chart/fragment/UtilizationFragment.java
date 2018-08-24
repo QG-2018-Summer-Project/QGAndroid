@@ -47,6 +47,7 @@ import butterknife.Unbinder;
 public class UtilizationFragment extends BaseChartFragment {
 
     private static final String TAG = "BarChartFragment";
+    private  ArrayList<Float> yData;
     private Unbinder unbinder;
     private IWXAPI api;
 
@@ -71,8 +72,6 @@ public class UtilizationFragment extends BaseChartFragment {
         swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
         swipeRefresh.setOnRefreshListener(this);
 
-        initChart();
-
         EventBus.getDefault().register(this);
         return view;
     }
@@ -92,7 +91,7 @@ public class UtilizationFragment extends BaseChartFragment {
         }
         final ArrayList<Float> yData = (ArrayList<Float>) floats;
         Log.e(TAG, "onResponse: " + yData);
-
+        initChart();
         setBarData(createBarEntryData(yData));
     }
 

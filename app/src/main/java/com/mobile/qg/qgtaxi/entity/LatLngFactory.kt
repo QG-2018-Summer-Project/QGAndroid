@@ -24,7 +24,7 @@ object LatLngFactory {
                 farLeft.latitude,
                 nearRight.longitude,
                 nearRight.latitude,
-                TimeUtil.getTime())
+                TimeUtil.getPredictedTime())
     }
 
     fun getPeriod(farLeft: LatLng, nearRight: LatLng, start: Long, end: Long): PeriodLatLng {

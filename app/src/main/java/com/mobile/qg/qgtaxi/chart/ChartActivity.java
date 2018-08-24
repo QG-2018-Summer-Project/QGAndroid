@@ -109,7 +109,6 @@ public class ChartActivity extends AppCompatActivity {
                         EventBus.getDefault().post(crowd);
                     } else {
                         Log.e(TAG, "onResponse: status!=2000");
-                        Toast.makeText(ChartActivity.this, "数据缺失", Toast.LENGTH_SHORT).show();
                         EventBus.getDefault().post(new Crowd("", new ArrayList<Float>()));
                     }
                 } else {
@@ -145,7 +144,6 @@ public class ChartActivity extends AppCompatActivity {
                         EventBus.getDefault().post(utilization);
                     } else {
                         Log.e(TAG, "onResponse: status!=2000");
-                        Toast.makeText(ChartActivity.this, "数据缺失", Toast.LENGTH_SHORT).show();
                         EventBus.getDefault().post(new Utilization("", new ArrayList<Float>()));
                     }
                 } else {
@@ -181,7 +179,6 @@ public class ChartActivity extends AppCompatActivity {
                         EventBus.getDefault().post(change);
                     } else {
                         Log.e(TAG, "onResponse: status!=2000");
-                        Toast.makeText(ChartActivity.this, "数据缺失", Toast.LENGTH_SHORT).show();
                         EventBus.getDefault().post(new Change("", new ArrayList<Float>()));
                     }
 

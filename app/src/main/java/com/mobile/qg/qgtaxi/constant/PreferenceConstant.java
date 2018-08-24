@@ -14,11 +14,11 @@ public class PreferenceConstant {
     public static final String KEY_PERIOD = "KEY_TIME";/*轮询时间*/
     public static final String DEFAULT_PERIOD = "5";
 
+    public static final String KEY_PORT = "KEY_PORT";
+    public static final String DEFAULT_PORT = "8080";
+
     public static final String KEY_ROUTE = "into RouteActivity";
     public static final int VALUE_ROUTE_START = 1;
     public static final int VALUE_ROUTE_END = 2;
-
-
-
 
 }

@@ -13,9 +13,11 @@ import com.mobile.qg.qgtaxi.base.BaseApi;
 import java.util.regex.Pattern;
 
 import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.DEFAULT_PERIOD;
+import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.DEFAULT_PORT;
 import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.DEFAULT_TIMEOUT;
 import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.DEFAULT_URL;
 import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.KEY_PERIOD;
+import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.KEY_PORT;
 import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.KEY_TIMEOUT;
 import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.KEY_URL;
 
@@ -28,11 +30,14 @@ import static com.mobile.qg.qgtaxi.constant.PreferenceConstant.KEY_URL;
 public class SettingFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener, Preference.OnPreferenceChangeListener {
 
     private EditTextPreference urlEt;
+    private EditTextPreference portEt;
     private EditTextPreference timeoutEt;
     private EditTextPreference timeEt;
 
     private SharedPreferences sharedPreferences;
     private static final String regex = "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}";
+    private static final String PORT_REGEX = "[0-9]{1,5}";
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,7 +50,8 @@ public class SettingFragment extends PreferenceFragment implements SharedPrefere
     }
 
     private void setSummary() {
-        urlEt.setSummary("当前的服务器地址:" + sharedPreferences.getString(KEY_URL, DEFAULT_URL));
+        urlEt.setSummary("当前的服务器地址：" + sharedPreferences.getString(KEY_URL, DEFAULT_URL));
+        portEt.setSummary("当前的端口号：" + sharedPreferences.getString(KEY_PORT, DEFAULT_PORT));
         timeoutEt.setSummary(sharedPreferences.getString(KEY_TIMEOUT, DEFAULT_TIMEOUT) + "秒(请输入数字)");
         timeEt.setSummary(sharedPreferences.getString(KEY_PERIOD, DEFAULT_PERIOD) + "秒(请输入数字)");
     }
@@ -65,10 +71,12 @@ public class SettingFragment extends PreferenceFragment implements SharedPrefere
 
     private void initPreferences() {
         urlEt = (EditTextPreference) findPreference(KEY_URL);
+        portEt = (EditTextPreference) findPreference(KEY_PORT);
         timeoutEt = (EditTextPreference) findPreference(KEY_TIMEOUT);
         timeEt = (EditTextPreference) findPreference(KEY_PERIOD);
 
         urlEt.setOnPreferenceChangeListener(this);
+        portEt.setOnPreferenceChangeListener(this);
         timeoutEt.setOnPreferenceChangeListener(this);
         timeEt.setOnPreferenceChangeListener(this);
     }
@@ -81,6 +89,13 @@ public class SettingFragment extends PreferenceFragment implements SharedPrefere
                 urlEt.setSummary("当前的服务器地址:" + ip);
                 BaseApi.edit()
                         .ip(ip)
+                        .accept();
+                break;
+            case KEY_PORT:
+                String port = sharedPreferences.getString(KEY_PORT, DEFAULT_PORT);
+                portEt.setSummary("当前的端口号：" + port);
+                BaseApi.edit()
+                        .port(port)
                         .accept();
                 break;
             case KEY_TIMEOUT:
@@ -109,6 +124,9 @@ public class SettingFragment extends PreferenceFragment implements SharedPrefere
             case KEY_URL:
                 toast(Pattern.matches(regex, value) ? "修改服务器地址成功" : "IP地址不合法");
                 return Pattern.matches(regex, value);
+            case KEY_PORT:
+                toast(Pattern.matches(PORT_REGEX, value) ? "修改端口成功" : "端口不合法");
+                return Pattern.matches(PORT_REGEX, value);
             case KEY_TIMEOUT:
                 toast(Integer.parseInt(value) < 5 ? "连接超时不能低于5秒" : "修改连接超时成功");
                 return Integer.parseInt(value) >= 5;

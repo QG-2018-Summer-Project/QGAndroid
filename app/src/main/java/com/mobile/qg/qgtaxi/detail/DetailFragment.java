@@ -64,7 +64,10 @@ public class DetailFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.widget_bottom_dialog, container, false);
         startUpAnimation(view);
 
-        ((TextView) view.findViewById(R.id.tv_name)).setText(mPoi.getName());
+        if (mPoi != null) {
+            ((TextView) view.findViewById(R.id.tv_name)).setText(mPoi.getName() == null ? "" : mPoi.getName());
+        }
+
         view.findViewById(R.id.cd_best).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

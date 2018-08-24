@@ -8,6 +8,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.mobile.qg.qgtaxi.R;
 import com.mobile.qg.qgtaxi.entity.CurrentLatLng;
@@ -59,14 +60,15 @@ public class SituationActivity extends AppCompatActivity implements SwipeRefresh
 
         SituationApi.getInstance().requestSituation(new Exception(mLatLng.getCurrentTime()), new SituationCallback() {
             @Override
-            public void result(int status, final List<PointSet> pointSetList) {
+            public void result(final int status, final List<PointSet> pointSetList) {
                 Log.e(TAG, "result: " + status + pointSetList);
-                if (status == 2000 && pointSetList != null) {
-                    Log.e(TAG, "result: " + pointSetList);
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        if (status == 2000 && pointSetList != null) {
+                            Log.e(TAG, "result: " + pointSetList);
 
                             if (mAdapter == null) {
                                 mAdapter = new SituationAdapter(pointSetList);
@@ -75,13 +77,13 @@ public class SituationActivity extends AppCompatActivity implements SwipeRefresh
                             } else {
                                 mAdapter.refresh(pointSetList);
                             }
-
-                            swipeRefresh.setRefreshing(false);
-
+                        } else {
+                            Toast.makeText(SituationActivity.this, "请求失败，请检查网络连接", Toast.LENGTH_SHORT).show();
                         }
-                    });
+                        swipeRefresh.setRefreshing(false);
 
-                }
+                    }
+                });
             }
         });
 

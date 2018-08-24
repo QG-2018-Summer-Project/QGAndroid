@@ -45,10 +45,10 @@ import butterknife.Unbinder;
  * Created by 93922 on 2018/8/16.
  * 描述：线图，展示地区流量变化率
  */
-
 public class ChangeFragment extends BaseChartFragment {
 
     private static final String TAG = "ChartFragment";
+    private ArrayList<Float> yData;
 
     private IWXAPI api;
     private Unbinder unbinder;
@@ -74,6 +74,12 @@ public class ChangeFragment extends BaseChartFragment {
         swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
         swipeRefresh.setOnRefreshListener(this);
 
+        if (yData != null) {
+            initChart(yData);
+            createEntryData(yData);
+            setData(createEntryData(yData));
+        }
+
         EventBus.getDefault().register(this);
         return view;
     }
@@ -93,8 +99,7 @@ public class ChangeFragment extends BaseChartFragment {
             return;
         }
 
-        final ArrayList<Float> yData = (ArrayList<Float>) floats;
-        Log.e(TAG, "onResponse: " + yData);
+        yData = (ArrayList<Float>) floats;
 
         initChart(yData);
         createEntryData(yData);

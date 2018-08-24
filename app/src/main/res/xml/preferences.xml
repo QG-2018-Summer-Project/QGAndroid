@@ -7,12 +7,20 @@
         android:title="网络设置">
 
         <EditTextPreference
-            android:hint="输入格式为：（后期回来补）"
             android:inputType="textUri"
             android:key="KEY_URL"
             android:layout="@layout/preference_item"
             android:summary="当前的服务器地址：http：//23333"
             android:title="服务器地址" />
+
+        <EditTextPreference
+            android:inputType="number"
+            android:key="KEY_PORT"
+            android:layout="@layout/preference_item"
+            android:numeric="integer"
+            android:summary="8080"
+            android:title="端口号" />
+
         <EditTextPreference
             android:inputType="number"
             android:key="KEY_TIMEOUT"
@@ -27,6 +35,7 @@
             android:numeric="integer"
             android:summary="5秒(请输入数字)"
             android:title="轮询间隔" />
+
 
     </PreferenceCategory>
 

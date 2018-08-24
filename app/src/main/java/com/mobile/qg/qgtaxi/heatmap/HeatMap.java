@@ -123,64 +123,6 @@ public class HeatMap {
         }
     }
 
-//    public void showLive() {
-//
-//        mDisposable = Observable.interval(0, BaseApi.getPeriod(), TimeUnit.SECONDS)
-//                .subscribe(new Consumer<Long>() {
-//                    @Override
-//                    public void accept(final Long aLong) {
-//
-//                        Observable.create(new ObservableOnSubscribe<TileOverlayOptions>() {
-//                            @Override
-//                            public void subscribe(ObservableEmitter<TileOverlayOptions> emitter) {
-//                                VisibleRegion region = aMap.getProjection().getVisibleRegion();
-//                                CurrentLatLng latLng = LatLngFactory.INSTANCE.getCurrent(region.farLeft, region.nearRight);
-//                                Response response = HeatMapApi.getInstance().liveHeatMap(latLng);
-//                                try {
-//
-//                                    if (response != null && response.code() == 200) {
-//                                        String responseData = Objects.requireNonNull(response.body()).string();
-//                                        HeatMapResponse heatMapResponse = new Gson().fromJson(responseData, HeatMapResponse.class);
-//                                        Log.e(TAG, "subscribe: " + heatMapResponse.getPointSet().size());
-//                                        TileOverlayOptions options = HeatMapOverlay.getHeatMapOverlay(heatMapResponse.getPointSet());
-//                                        emitter.onNext(options);
-//                                    }
-//
-//                                } catch (Exception e) {
-//                                    emitter.onError(e);
-//                                }
-//
-//                            }
-//                        }).subscribeOn(Schedulers.io())
-//                                .observeOn(AndroidSchedulers.mainThread())
-//                                .subscribe(new Observer<TileOverlayOptions>() {
-//                                    @Override
-//                                    public void onSubscribe(Disposable d) {
-//
-//                                    }
-//
-//                                    @Override
-//                                    public void onNext(TileOverlayOptions tileOverlayOptions) {
-//                                        aMap.clear();
-//                                        aMap.addTileOverlay(tileOverlayOptions);
-//                                    }
-//
-//                                    @Override
-//                                    public void onError(Throwable e) {
-//                                        //网络错误
-//                                        Toast.makeText(context, "连接失败，请检查网络连接", Toast.LENGTH_SHORT).show();
-//                                    }
-//
-//                                    @Override
-//                                    public void onComplete() {
-//
-//                                    }
-//                                });
-//                    }
-//                });
-//
-//    }
-
     /**
      * 展示实时热力图
      */
@@ -196,7 +138,7 @@ public class HeatMap {
                             public void subscribe(ObservableEmitter<List<HeatMapLatLng>> emitter) throws IOException {
 
                                 VisibleRegion region = aMap.getProjection().getVisibleRegion();
-                                sendResponse(HeatMapApi.getInstance()
+                                sendResponse(HeatMapApi.Companion.getInstance()
                                         .liveHeatMap(LatLngFactory.INSTANCE.getCurrent(region.farLeft, region.nearRight)), emitter);
                             }
                         }).subscribeOn(Schedulers.io())
@@ -224,9 +166,9 @@ public class HeatMap {
 
                 VisibleRegion region = aMap.getProjection().getVisibleRegion();
                 long start = TimeUtil.getLong(time);
-                long end = start + 3600000L;
+                long end = start + 1000 * 60 * 10;
 
-                sendResponse(HeatMapApi.getInstance()
+                sendResponse(HeatMapApi.Companion.getInstance()
                         .periodHeatMap(LatLngFactory.INSTANCE.getPeriod(region.farLeft, region.nearRight, start, end)), emitter);
             }
         }).subscribeOn(Schedulers.io())
@@ -249,7 +191,7 @@ public class HeatMap {
             @Override
             public void subscribe(ObservableEmitter<List<HeatMapLatLng>> emitter) throws IOException {
                 VisibleRegion region = aMap.getProjection().getVisibleRegion();
-                sendResponse(HeatMapApi.getInstance()
+                sendResponse(HeatMapApi.Companion.getInstance()
                         .predictedCount(LatLngFactory.INSTANCE.getPredict(region.farLeft, region.nearRight)), emitter);
             }
 
@@ -273,7 +215,7 @@ public class HeatMap {
             @Override
             public void subscribe(ObservableEmitter<List<HeatMapLatLng>> emitter) throws IOException {
                 VisibleRegion region = aMap.getProjection().getVisibleRegion();
-                sendResponse(HeatMapApi.getInstance()
+                sendResponse(HeatMapApi.Companion.getInstance()
                         .predictedDemand(LatLngFactory.INSTANCE.getPredict(region.farLeft, region.nearRight)), emitter);
             }
         }).subscribeOn(Schedulers.io())
